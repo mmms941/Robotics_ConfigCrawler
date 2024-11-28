@@ -357,6 +357,51 @@ with open("configs.txt", "w", encoding="utf-8") as file:
     for code in processed_codes:
         file.write(code.encode("utf-8").decode("utf-8") + "\n")
 
+# ایجاد فایل HTML برای نمایش کانفیگ‌ها
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configs List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Configs List</h1>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Configuration</th>
+        </tr>
+"""
+
+# افزودن کانفیگ‌ها به جدول HTML
+for idx, config in enumerate(processed_codes, start=1):
+    html_content += f"""
+        <tr>
+            <td>{idx}</td>
+            <td>{config}</td>
+        </tr>
+    """
+
+html_content += """
+    </table>
+</body>
+</html>
+"""
+
+# ذخیره فایل HTML
+with open("configs.html", "w", encoding="utf-8") as html_file:
+    html_file.write(html_content)
+print(f'\nHTML file (configs.html) has been created.')
 print(f'\nTime spent - {str(datetime.now() - start_time).split(".")[0]}')
 #print(f'\nTime spent - {timedelta(seconds=int((datetime.now() - start_time).total_seconds()))}')
 
