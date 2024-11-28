@@ -399,9 +399,9 @@ html_content += """
 """
 
 # ذخیره فایل HTML
-with open("configs.html", "w", encoding="utf-8") as html_file:
+with open("index.html", "w", encoding="utf-8") as html_file:
     html_file.write(html_content)
-print(f'\nHTML file (configs.html) has been created.')
+print(f'\nHTML file (index.html) has been created.')
 print(f'\nTime spent - {str(datetime.now() - start_time).split(".")[0]}')
 #print(f'\nTime spent - {timedelta(seconds=int((datetime.now() - start_time).total_seconds()))}')
 
