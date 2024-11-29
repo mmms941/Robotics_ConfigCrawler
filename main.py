@@ -37,16 +37,21 @@ def get_country_from_config(config_url):
         # باز کردن دیتابیس
         reader = geoip2.database.Reader(DB_PATH)
 
-        # استخراج آدرس سرور از URL کانفیگ
-        parsed_url = urlparse(config_url)
-        server_ip = parsed_url.netloc.split(':')[0]  # جدا کردن پورت از IP (در صورت وجود)
-
-        # جستجوی کشور بر اساس IP
-        response = reader.country(server_ip)
-        reader.close()
-        return response.country.name
+        # استخراج IP با استفاده از regex
+        pattern = r"@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"  # الگو برای IP بعد از @
+        match = re.search(pattern, config_url)
+        
+        if match:
+            server_ip = match.group(1)  # IP استخراج شده
+            
+            # جستجوی کشور بر اساس IP
+            response = reader.country(server_ip)
+            reader.close()
+            return response.country.name
+        else:
+            return "Unknown"  # اگر IP پیدا نشود
     except Exception as e:
-        return "Unknown"
+        return f"Error: {e}"
 
 def substring_del(string_list):
     list1 = list(string_list)
