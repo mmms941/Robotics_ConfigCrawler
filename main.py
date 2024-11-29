@@ -79,14 +79,13 @@ inv_tg_name_json = json_load('blacklist channels.json')
 inv_tg_name_json[:] = [x for x in inv_tg_name_json if len(x) >= 5]
 inv_tg_name_json = list(set(inv_tg_name_json)-set(tg_name_json))
 
-thrd_pars = int(input('\nThreads for parsing: '))
-pars_dp = int(input('\nParsing depth (1dp = 20 last tg posts): '))
+thrd_pars = 5
+pars_dp = 1
 
 print(f'\nTotal channel names in tg channels.json         - {len(tg_name_json)}')
 print(f'Total channel names in blacklist channels.json - {len(inv_tg_name_json)}')
 
-while (use_inv_tc := input('\nTry looking for proxy configs from "blacklist channels.json" too? (Enter y/n): ').lower()) not in {"y", "n"}: pass
-print()
+use_inv_tc = 'n'
 
 start_time = datetime.now()
 
