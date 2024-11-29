@@ -41,20 +41,21 @@ def get_country_from_config(config_url):
         pattern = r"@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"  # الگو برای IP بعد از @
         match = re.search(pattern, config_url)
         
-        if match:
-            server_ip = match.group(1)  # IP استخراج شده
-            
-            # جستجوی کشور بر اساس IP
-            response = reader.country(server_ip)
-            reader.close()
-
-            # بازگرداندن نام و کد کشور یا Unknown
-            country_name = response.country.name or "Unknown"
-            country_code = response.country.iso_code.lower() if response.country.iso_code else "unknown"
-            return country_name, country_code
-        else:
+        if not match:
             return "Unknown", "unknown"  # اگر IP پیدا نشود
-    except:
+
+        server_ip = match.group(1)  # IP استخراج شده
+
+        # جستجوی کشور بر اساس IP
+        response = reader.country(server_ip)
+        reader.close()
+
+        # بررسی وجود مقادیر قبل از دسترسی
+        country_name = response.country.name if response.country and response.country.name else "Unknown"
+        country_code = response.country.iso_code.lower() if response.country and response.country.iso_code else "unknown"
+        return country_name, country_code
+    except Exception as e:
+        print(f"Error in get_country_from_config: {e}")  # لاگ خطا برای اشکال‌زدایی
         return "Unknown", "unknown"  # در صورت بروز هرگونه خطا
 def substring_del(string_list):
     list1 = list(string_list)
