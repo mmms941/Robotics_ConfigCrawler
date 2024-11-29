@@ -372,6 +372,12 @@ html_content = """
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f4f4f4; }
         tr:nth-child(even) { background-color: #f9f9f9; }
+        td.config {
+            max-width: 600px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         button {
             background-color: #4CAF50;
             color: white;
@@ -400,7 +406,7 @@ for idx, config in enumerate(processed_codes, start=1):
     html_content += f"""
         <tr>
             <td>{idx}</td>
-            <td>{config}</td>
+            <td class="config" title="{config}">{config}</td>
             <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
         </tr>
     """
