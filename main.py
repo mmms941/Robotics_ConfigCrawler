@@ -65,7 +65,7 @@ if use_inv_tc == 'y':
     tg_name_json.extend(inv_tg_name_json)
     inv_tg_name_json.clear()
     tg_name_json = list(set(tg_name_json))
-    tg_name_json = random.sample(tg_name_json, 50)
+    tg_name_json = sorted(tg_name_json)
 
 sem_pars = threading.Semaphore(thrd_pars)
 
@@ -117,7 +117,7 @@ print(f'\nFound tg channel names - {len(tg_name)}')
 print(f'Total old names        - {len(tg_name_json)}')
 tg_name_json.extend(tg_name)
 tg_name_json = list(set(tg_name_json))
-tg_name_json = random.sample(tg_name_json, 50)
+tg_name_json = sorted(tg_name_json)
 print(f'In the end, new names  - {len(tg_name_json)}')
 
 with open('tg channels.json', 'w', encoding="utf-8") as telegram_channels_file:
