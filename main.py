@@ -47,12 +47,15 @@ def get_country_from_config(config_url):
             # جستجوی کشور بر اساس IP
             response = reader.country(server_ip)
             reader.close()
-            return response.country.name
-        else:
-            return "Unknown"  # اگر IP پیدا نشود
-    except Exception as e:
-        return f"Error: {e}"
 
+            country_name = response.country.name or "Unknown"
+            country_code = response.country.iso_code.lower() or "unknown"  # کد کشور به حروف کوچک
+
+            return country_name, country_code
+        else:
+            return "Unknown", "unknown"  # اگر IP پیدا نشود
+    except Exception as e:
+        return f"Error: {e}", "unknown"
 def substring_del(string_list):
     list1 = list(string_list)
     list2 = list(string_list)
@@ -383,9 +386,10 @@ with open("configs.txt", "w", encoding="utf-8") as file:
         file.write(code.encode("utf-8").decode("utf-8") + "\n")
 
 # ایجاد فایل HTML برای نمایش کانفیگ‌ها
-processed_configs = []  # لیست جدید با کشورها
+processed_configs = []
 
 for idx, config in enumerate(processed_codes, start=1):
+    # تشخیص نوع کانفیگ
     config_type = ""
     if config.startswith("vless://"):
         config_type = "vless"
@@ -402,11 +406,11 @@ for idx, config in enumerate(processed_codes, start=1):
     else:
         config_type = "unknown"
 
-    # استخراج کشور کانفیگ
-    country = get_country_from_config(config)
+    # استخراج کشور و کد کشور
+    country, country_code = get_country_from_config(config)
 
-    # اضافه کردن کانفیگ و کشور به لیست پردازش‌شده
-    processed_configs.append((idx, config, config_type, country))
+    # اضافه کردن اطلاعات به لیست پردازش‌شده
+    processed_configs.append((idx, config, config_type, country, country_code))
 
 html_content = """
 <!DOCTYPE html>
@@ -446,6 +450,12 @@ html_content = """
             padding: 5px;
             font-size: 16px;
         }
+        img.flag {
+            width: 20px;
+            height: 15px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -473,13 +483,16 @@ html_content = """
 """
 
 # اضافه کردن ردیف‌ها به جدول
-for idx, config, config_type, country in processed_configs:
+for idx, config, config_type, country, country_code in processed_configs:
     html_content += f"""
         <tr data-type="{config_type}">
             <td>{idx}</td>
             <td class="config" title="{config}">{config}</td>
             <td>{config_type}</td>
-            <td>{country}</td>
+            <td>
+                <img class="flag" src="https://flagcdn.com/w40/{country_code}.png" alt="{country} Flag">
+                {country}
+            </td>
             <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
         </tr>
     """
