@@ -6,8 +6,12 @@ import time
 import random
 import re
 import base64
+import geoip2.database
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+# مسیر دیتابیس GeoLite2
+DB_PATH = "geolite2/GeoLite2-Country.mmdb"
 
 requests.post = lambda url, **kwargs: requests.request(
     method="POST", url=url, verify=False, **kwargs
@@ -27,6 +31,22 @@ def json_load(path):
     with open(path, 'r', encoding="utf-8") as file:
         list_content = json.load(file)
     return list_content
+# تابع استخراج کشور از کانفیگ
+def get_country_from_config(config_url):
+    try:
+        # باز کردن دیتابیس
+        reader = geoip2.database.Reader(DB_PATH)
+
+        # استخراج آدرس سرور از URL کانفیگ
+        parsed_url = urlparse(config_url)
+        server_ip = parsed_url.netloc.split(':')[0]  # جدا کردن پورت از IP (در صورت وجود)
+
+        # جستجوی کشور بر اساس IP
+        response = reader.country(server_ip)
+        reader.close()
+        return response.country.name
+    except Exception as e:
+        return "Unknown"
 
 def substring_del(string_list):
     list1 = list(string_list)
@@ -187,7 +207,7 @@ for part in codes:
     part = re.sub('%0D', '', part)
     part = requests.utils.unquote(requests.utils.unquote(part)).strip()
     part = re.sub(' ', '', part)
-    part = re.sub('', '', part)
+    part = re.sub('', '', part)
     part = re.sub(r'\x00', '', part)    
     part = re.sub(r'\x01', '', part)    
     part = re.sub('amp;', '', part)
@@ -358,6 +378,31 @@ with open("configs.txt", "w", encoding="utf-8") as file:
         file.write(code.encode("utf-8").decode("utf-8") + "\n")
 
 # ایجاد فایل HTML برای نمایش کانفیگ‌ها
+processed_configs = []  # لیست جدید با کشورها
+
+for idx, config in enumerate(processed_codes, start=1):
+    config_type = ""
+    if config.startswith("vless://"):
+        config_type = "vless"
+    elif config.startswith("vmess://"):
+        config_type = "vmess"
+    elif config.startswith("hysteria2://") or config.startswith("hy2://"):
+        config_type = "hysteria2"
+    elif config.startswith("ss://"):
+        config_type = "ss"
+    elif config.startswith("trojan://"):
+        config_type = "trojan"
+    elif config.startswith("wireguard://"):
+        config_type = "wireguard"
+    else:
+        config_type = "unknown"
+
+    # استخراج کشور کانفیگ
+    country = get_country_from_config(config)
+
+    # اضافه کردن کانفیگ و کشور به لیست پردازش‌شده
+    processed_configs.append((idx, config, config_type, country))
+
 html_content = """
 <!DOCTYPE html>
 <html lang="en">
@@ -416,32 +461,20 @@ html_content = """
         <tr>
             <th>#</th>
             <th>Configuration</th>
+            <th>Type</th>
+            <th>Country</th>
             <th>Action</th>
         </tr>
 """
 
-# افزودن کانفیگ‌ها به جدول HTML
-for idx, config in enumerate(processed_codes, start=1):
-    config_type = ""
-    if config.startswith("vless://"):
-        config_type = "vless"
-    elif config.startswith("vmess://"):
-        config_type = "vmess"
-    elif config.startswith("hysteria2://") or config.startswith("hy2://"):
-        config_type = "hysteria2"
-    elif config.startswith("ss://"):
-        config_type = "ss"
-    elif config.startswith("trojan://"):
-        config_type = "trojan"
-    elif config.startswith("wireguard://"):
-        config_type = "wireguard"
-    else:
-        config_type = "unknown"
-
+# اضافه کردن ردیف‌ها به جدول
+for idx, config, config_type, country in processed_configs:
     html_content += f"""
         <tr data-type="{config_type}">
             <td>{idx}</td>
             <td class="config" title="{config}">{config}</td>
+            <td>{config_type}</td>
+            <td>{country}</td>
             <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
         </tr>
     """
