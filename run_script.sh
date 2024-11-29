@@ -9,5 +9,5 @@ python3 /root/Robotics_ConfigCrawler/main.py
 # اضافه کردن و پوش کردن فایل‌ها به گیت هاب
 cd /root/Robotics_ConfigCrawler
 git add index.html configs.txt "tg channels.json" "blacklist channels.json"
-git commit -m "Auto Hourly Update: $(date)"
+git commit -m "Auto Update: $(date)"
 git push origin main
