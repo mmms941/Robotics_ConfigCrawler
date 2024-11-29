@@ -531,4 +531,4 @@ print(f'\nHTML file (index.html) has been created.')
 print(f'\nTime spent - {str(datetime.now() - start_time).split(".")[0]}')
 #print(f'\nTime spent - {timedelta(seconds=int((datetime.now() - start_time).total_seconds()))}')
 
-input('\nPress Enter to finish ...')
+print(f'\n...FINISH...')
