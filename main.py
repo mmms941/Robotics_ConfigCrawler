@@ -372,6 +372,17 @@ html_content = """
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f4f4f4; }
         tr:nth-child(even) { background-color: #f9f9f9; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -380,6 +391,7 @@ html_content = """
         <tr>
             <th>#</th>
             <th>Configuration</th>
+            <th>Action</th>
         </tr>
 """
 
@@ -389,15 +401,24 @@ for idx, config in enumerate(processed_codes, start=1):
         <tr>
             <td>{idx}</td>
             <td>{config}</td>
+            <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
         </tr>
     """
 
 html_content += """
     </table>
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard: ' + text);
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+    </script>
 </body>
 </html>
 """
-
 # ذخیره فایل HTML
 with open("index.html", "w", encoding="utf-8") as html_file:
     html_file.write(html_content)
