@@ -48,14 +48,14 @@ def get_country_from_config(config_url):
             response = reader.country(server_ip)
             reader.close()
 
+            # بازگرداندن نام و کد کشور یا Unknown
             country_name = response.country.name or "Unknown"
-            country_code = response.country.iso_code.lower() or "unknown"  # کد کشور به حروف کوچک
-
+            country_code = response.country.iso_code.lower() if response.country.iso_code else "unknown"
             return country_name, country_code
         else:
             return "Unknown", "unknown"  # اگر IP پیدا نشود
-    except Exception as e:
-        return f"Error: {e}", "unknown"
+    except:
+        return "Unknown", "unknown"  # در صورت بروز هرگونه خطا
 def substring_del(string_list):
     list1 = list(string_list)
     list2 = list(string_list)
