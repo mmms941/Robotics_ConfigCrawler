@@ -389,11 +389,30 @@ html_content = """
         button:hover {
             background-color: #45a049;
         }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .filter-container select {
+            padding: 5px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <h1>Configs List</h1>
-    <table>
+    <div class="filter-container">
+        <label for="filter">Filter by Type:</label>
+        <select id="filter" onchange="filterConfigs()">
+            <option value="all">All</option>
+            <option value="vless">VLESS</option>
+            <option value="vmess">VMESS</option>
+            <option value="hysteria2">Hysteria2</option>
+            <option value="ss">Shadowsocks</option>
+            <option value="trojan">Trojan</option>
+            <option value="wireguard">WireGuard</option>
+        </select>
+    </div>
+    <table id="configs-table">
         <tr>
             <th>#</th>
             <th>Configuration</th>
@@ -403,8 +422,24 @@ html_content = """
 
 # افزودن کانفیگ‌ها به جدول HTML
 for idx, config in enumerate(processed_codes, start=1):
+    config_type = ""
+    if config.startswith("vless://"):
+        config_type = "vless"
+    elif config.startswith("vmess://"):
+        config_type = "vmess"
+    elif config.startswith("hysteria2://") or config.startswith("hy2://"):
+        config_type = "hysteria2"
+    elif config.startswith("ss://"):
+        config_type = "ss"
+    elif config.startswith("trojan://"):
+        config_type = "trojan"
+    elif config.startswith("wireguard://"):
+        config_type = "wireguard"
+    else:
+        config_type = "unknown"
+
     html_content += f"""
-        <tr>
+        <tr data-type="{config_type}">
             <td>{idx}</td>
             <td class="config" title="{config}">{config}</td>
             <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
@@ -419,6 +454,18 @@ html_content += """
                 alert('Copied to clipboard: ' + text);
             }).catch(err => {
                 alert('Failed to copy: ' + err);
+            });
+        }
+
+        function filterConfigs() {
+            const filter = document.getElementById('filter').value;
+            const rows = document.querySelectorAll('#configs-table tr[data-type]');
+            rows.forEach(row => {
+                if (filter === 'all' || row.dataset.type === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         }
     </script>
