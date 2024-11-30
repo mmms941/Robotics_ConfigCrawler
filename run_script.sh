@@ -2,6 +2,7 @@
 
 export TERM=xterm
 VENV_PATH="/root/Robotics_ConfigCrawler/myenv"
+cd /root/Robotics_ConfigCrawler || { echo "Failed to change directory"; exit 1; }
 source $VENV_PATH/bin/activate
 # اجرای اسکریپت Python با ورودی‌ها
 python3 /root/Robotics_ConfigCrawler/main.py 
