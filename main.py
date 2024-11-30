@@ -419,9 +419,17 @@ html_content = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configs List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/iranyekan-webfont/css/iranyekan.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; margin-bottom: 20px; }
+        body {
+            font-family: 'Iranyekan', sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
         .filter-container {
             text-align: center;
             margin-bottom: 20px;
@@ -445,6 +453,9 @@ html_content = """
             width: 220px;
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;  /* Aligns the content and buttons properly */
         }
         .config-card h3 {
             font-size: 18px;
@@ -485,6 +496,7 @@ html_content = """
             margin: 8px 0;
             cursor: pointer;
             transition: all 0.4s ease;
+            align-self: center;  /* Center the button in the card */
         }
 
         .k2-copy-button:hover {
