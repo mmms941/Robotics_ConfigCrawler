@@ -414,13 +414,21 @@ for idx, config in enumerate(processed_codes, start=1):
 
 html_content = """
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configs List</title>
     <style>
-        /* تغییرات برای body */
+        /* تنظیم فونت Iranyekan */
+        @font-face {
+            font-family: 'Iranyekan';
+            src: url('assets/Yekan.woff2') format('woff2'),
+                 url('assets/Yekan.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             font-family: 'Tahoma', sans-serif;
             background-color: #00203F; /* تغییر رنگ پس‌زمینه */
@@ -428,14 +436,22 @@ html_content = """
             margin: 20px;
         }
 
-        /* تغییرات برای h1 و label */
-        h1, label {
-            color: #ADEFD1; /* تغییر رنگ */
+        h1 {
+            font-family: 'Iranyekan', sans-serif; /* تغییر فونت h1 */
+            text-align: center; /* وسط‌چین کردن */
+            color: #ADEFD1;
+            margin-bottom: 20px;
         }
 
         .filter-container {
-            text-align: center;
+            text-align: right;
             margin-bottom: 20px;
+            font-family: 'Iranyekan', sans-serif; /* تغییر فونت */
+            color: #ADEFD1; /* تغییر رنگ */
+        }
+
+        .filter-container label {
+            margin-left: 10px; /* فاصله بین متن و فیلتر */
         }
 
         .filter-container select {
@@ -452,7 +468,6 @@ html_content = """
             justify-content: center;
         }
 
-        /* تغییرات برای .config-card */
         .config-card {
             background-color: #ADEFD1; /* تغییر رنگ پس‌زمینه */
             border: 1px solid #ddd;
@@ -489,15 +504,6 @@ html_content = """
             word-break: break-word;
         }
 
-        /* بارگذاری فونت Iranyekan فقط برای دکمه‌ها */
-        @font-face {
-            font-family: 'Iranyekan';
-            src: url('assets/Yekan.woff2') format('woff2'),
-                 url('assets/Yekan.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-
         .k2-copy-button svg {
             margin-right: 10px;
             vertical-align: middle; /* Align svg properly with the text */
@@ -532,9 +538,9 @@ html_content = """
     </style>
 </head>
 <body>
-    <h1>Configs List</h1>
+    <h1>پروژه جمع‌آوری کانفیگ</h1>
     <div class="filter-container">
-        <label for="filter-country">Filter by Country:</label>
+        <label for="filter-country">مرتب‌سازی براساس کشور:</label>
         <select id="filter-country" onchange="applyFilters()">
             <option value="all">All</option>
 """
@@ -546,7 +552,7 @@ for country in countries:
 
 html_content += """
         </select>
-        <label for="filter-type">Filter by Type:</label>
+        <label for="filter-type">مرتب‌سازی براساس نوع:</label>
         <select id="filter-type" onchange="applyFilters()">
             <option value="all">All</option>
             <option value="vless">VLESS</option>
