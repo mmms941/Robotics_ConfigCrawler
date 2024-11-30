@@ -465,16 +465,36 @@ html_content = """
             margin-bottom: 10px;
             word-break: break-word;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 4px;
+
+        /* استایل دکمه کپی */
+        .k2-copy-button svg {
+            margin-right: 10px;
+            vertical-align: top;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .k2-copy-button {
+            height: 45px;
+            width: 155px;
+            color: #fff;
+            background: #265df2;
+            outline: none;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 400;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .k2-copy-button:hover {
+            background: #2ECC71;
+        }
+
+        @media (max-width: 480px) {
+            .k2-copy-button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -482,7 +502,7 @@ html_content = """
     <h1>Configs List</h1>
     <div class="filter-container">
         <label for="filter-country">Filter by Country:</label>
-        <select id="filter-country" onchange="filterByCountry()">
+        <select id="filter-country" onchange="applyFilters()">
             <option value="all">All</option>
 """
 
@@ -494,7 +514,7 @@ for country in countries:
 html_content += """
         </select>
         <label for="filter-type">Filter by Type:</label>
-        <select id="filter-type" onchange="filterByType()">
+        <select id="filter-type" onchange="applyFilters()">
             <option value="all">All</option>
             <option value="vless">VLESS</option>
             <option value="vmess">VMESS</option>
@@ -522,20 +542,33 @@ for idx, config, config_type, country, country_code in processed_configs:
             </h3>
             <div class="type">{config_type.upper()}</div>
             <div class="config" title="{config}">{config}</div>
-            <button onclick="copyToClipboard('{config}')">Copy</button>
+            <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
+                <svg aria-hidden="true" height="1em" preserveaspectratio="xMidYMid meet" role="img" viewbox="0 0 24 24" width="1em" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                    <g fill="none">
+                        <path d="M13 6.75V2H8.75A2.25 2.25 0 0 0 6.5 4.25v13a2.25 2.25 0 0 0 2.25 2.25h9A2.25 2.25 0 0 0 20 17.25V9h-4.75A2.25 2.25 0 0 1 13 6.75z" fill="currentColor"></path>
+                        <path d="M14.5 6.75V2.5l5 5h-4.25a.75.75 0 0 1-.75-.75z" fill="currentColor"></path>
+                    </g>
+                </svg>
+                کپی کردن
+            </button>
         </div>
     """
 
 html_content += """
     </div>
     <script>
-        function copyToClipboard(text) {
+        // تابع کپی کردن متن
+        function copyToClipboard(text, idx) {
             navigator.clipboard.writeText(text).then(() => {
-                alert('Copied to clipboard: ' + text);
+                // تغییر رنگ و متن دکمه
+                const button = document.getElementById("k2button-" + idx);
+                button.style.backgroundColor = "#2ECC71"; // سبز
+                button.innerText = "با موفقیت کپی شد"; // تغییر متن
             }).catch(err => {
-                alert('Failed to copy: ' + err);
+                console.log('Error:', err);
             });
         }
+
         // تابع کلی برای اعمال فیلترها
         function applyFilters() {
             const filterCountry = document.getElementById('filter-country').value.toLowerCase();
@@ -558,6 +591,7 @@ html_content += """
                 }
             });
         }
+
         // فراخوانی تابع کلی هنگام تغییر در هر یک از فیلترها
         document.getElementById('filter-country').addEventListener('change', applyFilters);
         document.getElementById('filter-type').addEventListener('change', applyFilters);
