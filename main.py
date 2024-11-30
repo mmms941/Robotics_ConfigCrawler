@@ -481,8 +481,20 @@ html_content = """
 <body>
     <h1>Configs List</h1>
     <div class="filter-container">
-        <label for="filter">Filter by Type:</label>
-        <select id="filter" onchange="filterConfigs()">
+        <label for="filter-country">Filter by Country:</label>
+        <select id="filter-country" onchange="filterByCountry()">
+            <option value="all">All</option>
+"""
+
+# ساختن لیست کشورها برای فیلتر
+countries = sorted(set([country for _, _, _, country, _ in processed_configs]))
+for country in countries:
+    html_content += f'<option value="{country}">{country}</option>\n'
+
+html_content += """
+        </select>
+        <label for="filter-type">Filter by Type:</label>
+        <select id="filter-type" onchange="filterByType()">
             <option value="all">All</option>
             <option value="vless">VLESS</option>
             <option value="vmess">VMESS</option>
@@ -497,12 +509,13 @@ html_content = """
 
 # اضافه کردن کارت‌ها برای هر کانفیگ
 for idx, config, config_type, country, country_code in processed_configs:
+    # اگر کشور نامشخص باشد، پیش‌فرض ایران است
     if country_code == "unknown":
         country = "Unknown"
-        country_code = "ir"
+        country_code = "aq"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
     html_content += f"""
-        <div class="config-card" data-type="{config_type}">
+        <div class="config-card" data-type="{config_type}" data-country="{country}">
             <h3>
                 <img src="{flag_url}" alt="{country} Flag">
                 {country}
@@ -524,11 +537,25 @@ html_content += """
             });
         }
 
-        function filterConfigs() {
-            const filter = document.getElementById('filter').value;
+        function filterByCountry() {
+            const filterCountry = document.getElementById('filter-country').value.toLowerCase();
             const cards = document.querySelectorAll('.config-card');
             cards.forEach(card => {
-                if (filter === 'all' || card.dataset.type === filter) {
+                const cardCountry = card.getAttribute('data-country').toLowerCase();
+                if (filterCountry === 'all' || cardCountry === filterCountry) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByType() {
+            const filterType = document.getElementById('filter-type').value.toLowerCase();
+            const cards = document.querySelectorAll('.config-card');
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type').toLowerCase();
+                if (filterType === 'all' || cardType === filterType) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
