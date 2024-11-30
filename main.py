@@ -412,7 +412,6 @@ for idx, config in enumerate(processed_codes, start=1):
     # اضافه کردن اطلاعات به لیست پردازش‌شده
     processed_configs.append((idx, config, config_type, country, country_code))
 
-
 html_content = """
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -445,7 +444,7 @@ html_content = """
         }
 
         .filter-container {
-            text-align: center; /* وسط‌چین کردن کل بخش فیلترها */
+            text-align: center;
             margin-bottom: 20px;
             font-family: 'Iranyekan', sans-serif; /* تغییر فونت */
             color: #ADEFD1; /* تغییر رنگ */
@@ -539,12 +538,11 @@ html_content = """
     </style>
 </head>
 <body>
-    <h1>پروژه جمع‌آوری کانفیگ از تلگرام</h1>
+    <h1> پروژه جمع‌آوری کانفیگ از تلگرام</h1>
     <div class="filter-container">
-        <div>
-            <label for="filter-country">مرتب‌سازی براساس کشور:</label>
-            <select id="filter-country" onchange="applyFilters()">
-                <option value="all">All</option>
+        <label for="filter-country">مرتب‌سازی براساس کشور:</label>
+        <select id="filter-country" onchange="applyFilters()">
+            <option value="all">All</option>
 """
 
 # ساختن لیست کشورها برای فیلتر
@@ -553,20 +551,17 @@ for country in countries:
     html_content += f'<option value="{country}">{country}</option>\n'
 
 html_content += """
-            </select>
-        </div>
-        <div>
-            <label for="filter-type">مرتب‌سازی براساس نوع:</label>
-            <select id="filter-type" onchange="applyFilters()">
-                <option value="all">All</option>
-                <option value="vless">VLESS</option>
-                <option value="vmess">VMESS</option>
-                <option value="hysteria2">Hysteria2</option>
-                <option value="ss">Shadowsocks</option>
-                <option value="trojan">Trojan</option>
-                <option value="wireguard">WireGuard</option>
-            </select>
-        </div>
+        </select>
+        <label for="filter-type">مرتب‌سازی براساس نوع:</label>
+        <select id="filter-type" onchange="applyFilters()">
+            <option value="all">All</option>
+            <option value="vless">VLESS</option>
+            <option value="vmess">VMESS</option>
+            <option value="hysteria2">Hysteria2</option>
+            <option value="ss">Shadowsocks</option>
+            <option value="trojan">Trojan</option>
+            <option value="wireguard">WireGuard</option>
+        </select>
     </div>
     <div class="container">
 """
@@ -649,6 +644,7 @@ html_content += """
 </body>
 </html>
 """
+
 
 # ذخیره فایل HTML
 with open("index.html", "w", encoding="utf-8") as html_file:
