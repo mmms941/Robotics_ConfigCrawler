@@ -498,7 +498,7 @@ html_content = """
 # اضافه کردن کارت‌ها برای هر کانفیگ
 for idx, config, config_type, country, country_code in processed_configs:
     if country_code == "unknown":
-        country = "Iran"
+        country = "Unknown"
         country_code = "ir"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
     html_content += f"""
