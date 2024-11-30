@@ -536,32 +536,31 @@ html_content += """
                 alert('Failed to copy: ' + err);
             });
         }
-
-        function filterByCountry() {
+        // تابع کلی برای اعمال فیلترها
+        function applyFilters() {
             const filterCountry = document.getElementById('filter-country').value.toLowerCase();
-            const cards = document.querySelectorAll('.config-card');
-            cards.forEach(card => {
-                const cardCountry = card.getAttribute('data-country').toLowerCase();
-                if (filterCountry === 'all' || cardCountry === filterCountry) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function filterByType() {
             const filterType = document.getElementById('filter-type').value.toLowerCase();
             const cards = document.querySelectorAll('.config-card');
+
             cards.forEach(card => {
+                const cardCountry = card.getAttribute('data-country').toLowerCase();
                 const cardType = card.getAttribute('data-type').toLowerCase();
-                if (filterType === 'all' || cardType === filterType) {
+
+                // بررسی تطابق کارت با هر دو فیلتر
+                const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
+                const matchesType = (filterType === 'all' || cardType === filterType);
+
+                // نمایش کارت اگر با هر دو فیلتر مطابقت داشته باشد
+                if (matchesCountry && matchesType) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
                 }
             });
         }
+        // فراخوانی تابع کلی هنگام تغییر در هر یک از فیلترها
+        document.getElementById('filter-country').addEventListener('change', applyFilters);
+        document.getElementById('filter-type').addEventListener('change', applyFilters);
     </script>
 </body>
 </html>
