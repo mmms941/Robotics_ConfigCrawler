@@ -79,8 +79,8 @@ inv_tg_name_json = json_load('blacklist channels.json')
 inv_tg_name_json[:] = [x for x in inv_tg_name_json if len(x) >= 5]
 inv_tg_name_json = list(set(inv_tg_name_json)-set(tg_name_json))
 
-thrd_pars = 10
-pars_dp = 2
+thrd_pars = 5
+pars_dp = 1
 
 print(f'\nTotal channel names in tg channels.json         - {len(tg_name_json)}')
 print(f'Total channel names in blacklist channels.json - {len(inv_tg_name_json)}')
@@ -421,40 +421,60 @@ html_content = """
     <title>Configs List</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        td.config {
-            max-width: 600px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        h1 { text-align: center; margin-bottom: 20px; }
+        .filter-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-container select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .config-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .config-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .config-card img {
+            width: 25px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .config-card .type {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .config-card .config {
+            font-size: 14px;
+            margin-bottom: 10px;
+            word-break: break-word;
         }
         button {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 12px;
             cursor: pointer;
             border-radius: 4px;
         }
         button:hover {
             background-color: #45a049;
-        }
-        .filter-container {
-            margin-bottom: 20px;
-        }
-        .filter-container select {
-            padding: 5px;
-            font-size: 16px;
-        }
-        img.flag {
-            width: 20px;
-            height: 15px;
-            margin-right: 5px;
-            vertical-align: middle;
         }
     </style>
 </head>
@@ -472,33 +492,25 @@ html_content = """
             <option value="wireguard">WireGuard</option>
         </select>
     </div>
-    <table id="configs-table">
-        <tr>
-            <th>#</th>
-            <th>Configuration</th>
-            <th>Type</th>
-            <th>Country</th>
-            <th>Action</th>
-        </tr>
+    <div class="container">
 """
 
-# اضافه کردن ردیف‌ها به جدول
+# اضافه کردن کارت‌ها برای هر کانفیگ
 for idx, config, config_type, country, country_code in processed_configs:
     html_content += f"""
-        <tr data-type="{config_type}">
-            <td>{idx}</td>
-            <td class="config" title="{config}">{config}</td>
-            <td>{config_type}</td>
-            <td>
-                <img class="flag" src="https://flagcdn.com/w40/{country_code}.png" alt="{country} Flag">
+        <div class="config-card" data-type="{config_type}">
+            <h3>
+                <img src="https://flagcdn.com/w40/{country_code}.png" alt="{country} Flag">
                 {country}
-            </td>
-            <td><button onclick="copyToClipboard('{config}')">Copy</button></td>
-        </tr>
+            </h3>
+            <div class="type">{config_type.upper()}</div>
+            <div class="config" title="{config}">{config}</div>
+            <button onclick="copyToClipboard('{config}')">Copy</button>
+        </div>
     """
 
 html_content += """
-    </table>
+    </div>
     <script>
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
@@ -510,12 +522,12 @@ html_content += """
 
         function filterConfigs() {
             const filter = document.getElementById('filter').value;
-            const rows = document.querySelectorAll('#configs-table tr[data-type]');
-            rows.forEach(row => {
-                if (filter === 'all' || row.dataset.type === filter) {
-                    row.style.display = '';
+            const cards = document.querySelectorAll('.config-card');
+            cards.forEach(card => {
+                if (filter === 'all' || card.dataset.type === filter) {
+                    card.style.display = 'block';
                 } else {
-                    row.style.display = 'none';
+                    card.style.display = 'none';
                 }
             });
         }
