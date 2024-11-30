@@ -430,7 +430,7 @@ html_content = """
         }
 
         body {
-            font-family: 'Iranyekan', sans-serif;
+            font-family: 'Tahoma', sans-serif; /* تغییر فونت کل صفحه به Tahoma */
             margin: 20px;
         }
 
@@ -467,7 +467,7 @@ html_content = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Aligns the content and buttons properly */
+            justify-content: space-between;
         }
 
         .config-card h3 {
@@ -496,7 +496,7 @@ html_content = """
         /* استایل دکمه کپی */
         .k2-copy-button svg {
             margin-right: 10px;
-            vertical-align: top;
+            vertical-align: middle; /* تنظیم موقعیت svg برای تراز شدن با متن */
         }
 
         .k2-copy-button {
@@ -512,6 +512,7 @@ html_content = """
             margin: 8px 0;
             cursor: pointer;
             transition: all 0.4s ease;
+            font-family: 'Iranyekan', sans-serif; /* تغییر فونت فقط برای دکمه */
             align-self: center; /* Center the button in the card */
         }
 
@@ -592,6 +593,12 @@ html_content += """
                 const button = document.getElementById("k2button-" + idx);
                 button.style.backgroundColor = "#2ECC71"; // سبز
                 button.innerText = "با موفقیت کپی شد"; // تغییر متن
+
+                // بعد از 3 ثانیه، بازگشت به حالت اول
+                setTimeout(() => {
+                    button.style.backgroundColor = "#265df2"; // آبی
+                    button.innerText = "کپی کردن"; // تغییر متن به حالت اولیه
+                }, 3000);
             }).catch(err => {
                 console.log('Error:', err);
             });
