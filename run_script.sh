@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+export TERM=xterm
 VENV_PATH="/root/Robotics_ConfigCrawler/myenv"
 source $VENV_PATH/bin/activate
 # اجرای اسکریپت Python با ورودی‌ها
