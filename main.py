@@ -85,7 +85,7 @@ pars_dp = 1
 print(f'\nTotal channel names in tg channels.json         - {len(tg_name_json)}')
 print(f'Total channel names in blacklist channels.json - {len(inv_tg_name_json)}')
 
-use_inv_tc = 'n'
+use_inv_tc = 'y'
 
 start_time = datetime.now()
 
@@ -497,10 +497,12 @@ html_content = """
 
 # اضافه کردن کارت‌ها برای هر کانفیگ
 for idx, config, config_type, country, country_code in processed_configs:
+    # استفاده از پرچم پیش‌فرض در صورت Unknown بودن
+    flag_url = f"https://flagcdn.com/w40/{country_code}.png" if country_code != "unknown" else "https://upload.wikimedia.org/wikipedia/commons/e/e0/United_Nations_Flag.svg"
     html_content += f"""
         <div class="config-card" data-type="{config_type}">
             <h3>
-                <img src="https://flagcdn.com/w40/{country_code}.png" alt="{country} Flag">
+                <img src="{flag_url}" alt="{country} Flag">
                 {country}
             </h3>
             <div class="type">{config_type.upper()}</div>
