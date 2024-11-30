@@ -419,33 +419,45 @@ html_content = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configs List</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/iranyekan-webfont/css/iranyekan.css" rel="stylesheet">
     <style>
+        /* بارگذاری فونت Iranyekan از پوشه assets */
+        @font-face {
+            font-family: 'Iranyekan';
+            src: url('assets/Yekan.woff2') format('woff2'),
+                 url('assets/Yekan.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             font-family: 'Iranyekan', sans-serif;
             margin: 20px;
         }
+
         h1 {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .filter-container {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .filter-container select {
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         .container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
         }
+
         .config-card {
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -455,22 +467,26 @@ html_content = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;  /* Aligns the content and buttons properly */
+            justify-content: space-between; /* Aligns the content and buttons properly */
         }
+
         .config-card h3 {
             font-size: 18px;
             margin-bottom: 10px;
         }
+
         .config-card img {
             width: 25px;
             height: 20px;
             margin-right: 5px;
             vertical-align: middle;
         }
+
         .config-card .type {
             font-weight: bold;
             margin-bottom: 10px;
         }
+
         .config-card .config {
             font-size: 14px;
             margin-bottom: 10px;
@@ -496,7 +512,7 @@ html_content = """
             margin: 8px 0;
             cursor: pointer;
             transition: all 0.4s ease;
-            align-self: center;  /* Center the button in the card */
+            align-self: center; /* Center the button in the card */
         }
 
         .k2-copy-button:hover {
