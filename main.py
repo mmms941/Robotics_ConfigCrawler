@@ -420,23 +420,17 @@ html_content = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configs List</title>
     <style>
-        /* بارگذاری فونت Iranyekan از پوشه assets */
-        @font-face {
-            font-family: 'Iranyekan';
-            src: url('assets/Yekan.woff2') format('woff2'),
-                 url('assets/Yekan.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-
+        /* تغییرات برای body */
         body {
-            font-family: 'Tahoma', sans-serif; /* تغییر فونت کل صفحه به Tahoma */
+            font-family: 'Tahoma', sans-serif;
+            background-color: #00203F; /* تغییر رنگ پس‌زمینه */
+            color: #00203F; /* تغییر رنگ متن */
             margin: 20px;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
+        /* تغییرات برای h1 و label */
+        h1, label {
+            color: #ADEFD1; /* تغییر رنگ */
         }
 
         .filter-container {
@@ -458,7 +452,9 @@ html_content = """
             justify-content: center;
         }
 
+        /* تغییرات برای .config-card */
         .config-card {
+            background-color: #ADEFD1; /* تغییر رنگ پس‌زمینه */
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
@@ -467,7 +463,7 @@ html_content = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-between; /* Aligns the content and buttons properly */
         }
 
         .config-card h3 {
@@ -493,13 +489,22 @@ html_content = """
             word-break: break-word;
         }
 
-        /* استایل دکمه کپی */
+        /* بارگذاری فونت Iranyekan فقط برای دکمه‌ها */
+        @font-face {
+            font-family: 'Iranyekan';
+            src: url('assets/Yekan.woff2') format('woff2'),
+                 url('assets/Yekan.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         .k2-copy-button svg {
             margin-right: 10px;
-            vertical-align: middle; /* تنظیم موقعیت svg برای تراز شدن با متن */
+            vertical-align: middle; /* Align svg properly with the text */
         }
 
         .k2-copy-button {
+            font-family: 'Iranyekan', sans-serif; /* تغییر فونت دکمه‌ها به Iranyekan */
             height: 45px;
             width: 155px;
             color: #fff;
@@ -512,7 +517,6 @@ html_content = """
             margin: 8px 0;
             cursor: pointer;
             transition: all 0.4s ease;
-            font-family: 'Iranyekan', sans-serif; /* تغییر فونت فقط برای دکمه */
             align-self: center; /* Center the button in the card */
         }
 
@@ -594,10 +598,10 @@ html_content += """
                 button.style.backgroundColor = "#2ECC71"; // سبز
                 button.innerText = "با موفقیت کپی شد"; // تغییر متن
 
-                // بعد از 3 ثانیه، بازگشت به حالت اول
+                // بعد از 3 ثانیه به حالت اول برگرداندن
                 setTimeout(() => {
-                    button.style.backgroundColor = "#265df2"; // آبی
-                    button.innerText = "کپی کردن"; // تغییر متن به حالت اولیه
+                    button.style.backgroundColor = "#265df2"; // رنگ آبی
+                    button.innerText = "کپی کردن"; // تغییر متن
                 }, 3000);
             }).catch(err => {
                 console.log('Error:', err);
@@ -634,6 +638,7 @@ html_content += """
 </body>
 </html>
 """
+
 # ذخیره فایل HTML
 with open("index.html", "w", encoding="utf-8") as html_file:
     html_file.write(html_content)
