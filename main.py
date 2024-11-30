@@ -79,8 +79,8 @@ inv_tg_name_json = json_load('blacklist channels.json')
 inv_tg_name_json[:] = [x for x in inv_tg_name_json if len(x) >= 5]
 inv_tg_name_json = list(set(inv_tg_name_json)-set(tg_name_json))
 
-thrd_pars = 5
-pars_dp = 1
+thrd_pars = 10
+pars_dp = 2
 
 print(f'\nTotal channel names in tg channels.json         - {len(tg_name_json)}')
 print(f'Total channel names in blacklist channels.json - {len(inv_tg_name_json)}')
