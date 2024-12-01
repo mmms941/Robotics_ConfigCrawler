@@ -130,12 +130,13 @@ def filter_old_configs(processed_configs):
     # فیلتر کردن کانفیگ‌ها که از 2 ماه بیشتر عمر دارند
     return [config for config in processed_configs if datetime.strptime(config[5], "%Y/%m/%d %H:%M") > two_months_ago]
 
-# صفحه‌بندی کارت‌ها (400 کارت در هر صفحه)
-def paginate_configs(processed_configs, items_per_page=400):
+# صفحه‌بندی کارت‌ها (300 کارت در هر صفحه)
+def paginate_configs(processed_configs, items_per_page=300):
     # تعداد صفحات
     num_pages = len(processed_configs) // items_per_page + (1 if len(processed_configs) % items_per_page != 0 else 0)
     pages = [processed_configs[i * items_per_page: (i + 1) * items_per_page] for i in range(num_pages)]
     return pages
+
 
 def substring_del(string_list):
     list1 = list(string_list)
@@ -623,6 +624,25 @@ html_content = """
                 width: 100%;
             }
         }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: #265df2;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #2ECC71;
+        }
     </style>
 </head>
 <body>
@@ -690,8 +710,18 @@ for page_num, page in enumerate(pages, 1):
                 </button>
             </div>
         """
+
+    # اضافه کردن دکمه‌های صفحه‌بندی
+    html_content += f"""
+    <div class="pagination">
+        <button onclick="showPage({page_num - 1})" {('disabled' if page_num == 1 else '')}>قبلی</button>
+        <button onclick="showPage({page_num + 1})" {('disabled' if page_num == len(pages) else '')}>بعدی</button>
+    </div>
+    """
+
 html_content += """
     </div>
+
 <script>
     function copyToClipboard(text, idx) {
         navigator.clipboard.writeText(text).then(() => {
@@ -707,24 +737,24 @@ html_content += """
         });
     }
 
-    function applyFilters() {
-        const filterCountry = document.getElementById('filter-country').value.toLowerCase();
-        const filterType = document.getElementById('filter-type').value.toLowerCase();
-        const cards = document.querySelectorAll('.config-card');
+    function showPage(pageNum) {
+        const allPages = document.querySelectorAll(".container > .config-card");
+        
+        // Hide all pages
+        allPages.forEach(page => page.style.display = 'none');
+        
+        // Show the page that corresponds to the current page number
+        const pages = document.querySelectorAll(".container > .config-card");
+        let startIndex = (pageNum - 1) * 300;
+        let endIndex = pageNum * 300;
 
-        cards.forEach(card => {
-            const cardCountry = card.getAttribute('data-country').toLowerCase();
-            const cardType = card.getAttribute('data-type').toLowerCase();
+        for (let i = startIndex; i < endIndex && i < pages.length; i++) {
+            pages[i].style.display = 'block';
+        }
+    }
 
-            const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
-            const matchesType = (filterType === 'all' || cardType === filterType);
-
-            if (matchesCountry && matchesType) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
+    window.onload = function() {
+        showPage(1);  // Show the first page by default
     }
 </script>
 </body>
