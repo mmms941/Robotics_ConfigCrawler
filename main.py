@@ -10,6 +10,7 @@ import geoip2.database
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from datetime import datetime
 # مسیر دیتابیس GeoLite2
 DB_PATH = "geolite2/GeoLite2-Country.mmdb"
 
@@ -157,35 +158,44 @@ print(f'\nStart Parsing...\n')
 
 def process(i_url):
     sem_pars.acquire()
-    html_pages = list()   
+    html_pages = list()
     cur_url = i_url
     god_tg_name = False
-    for itter in range(1, pars_dp+1):
+    for itter in range(1, pars_dp + 1):
         while True:
             try:
                 response = requests.get(f'https://t.me/s/{cur_url}')
             except:
-                time.sleep(random.randint(5,25))
+                time.sleep(random.randint(5, 25))
                 pass
             else:
                 if itter == pars_dp:
-                    print(f'{tg_name_json.index(i_url)+1} of {walen} - {i_url}')
+                    print(f'{tg_name_json.index(i_url) + 1} of {walen} - {i_url}')
                 html_pages.append(response.text)
                 last_datbef = re.findall(pattern_datbef, response.text)
                 break
         if not last_datbef:
             break
         cur_url = f'{i_url}?before={last_datbef[0]}'
+
     for page in html_pages:
         soup = BeautifulSoup(page, 'html.parser')
         code_tags = soup.find_all(class_='tgme_widget_message_text')
-        for code_tag in code_tags:
+        time_tags = soup.find_all(class_='tgme_widget_message_date')  # استخراج تگ‌های مربوط به زمان
+
+        for code_tag, time_tag in zip(code_tags, time_tags):
             code_content2 = str(code_tag).split('<br/>')
+            time_content = time_tag.find('time')['datetime']  # استخراج زمان ارسال پیام
+
+            # تبدیل زمان به فرمت دلخواه (YYYY/MM/DD HH:MM)
+            time_obj = datetime.fromisoformat(time_content.replace('Z', ''))  # تبدیل به شیء datetime
+            formatted_time = time_obj.strftime('%Y/%m/%d %H:%M')  # فرمت دلخواه
+
             for code_content in code_content2:
-                if "vless://" in code_content or "ss://" in code_content or "vmess://" in code_content or "trojan://" in code_content or "tuic://" in code_content or "hysteria://" in code_content or "hy2://" in code_content or "hysteria2://" in code_content or "juicity://" in code_content or "nekoray://" in code_content or "sn://" in code_content or "husi://" in code_content or "exclave://" in code_content or "ulink://" in code_content or "socks4://" in code_content or "socks5://" in code_content or "socks://" in code_content or "naive+" in code_content or "wireguard://" in code_content or "wg://" in code_content:
-                    codes.append(re.sub(htmltag_pattern, '', code_content))
+                if any(proto in code_content for proto in ["vless://", "ss://", "vmess://", "trojan://", "tuic://"]):
+                    codes.append((re.sub(htmltag_pattern, '', code_content), formatted_time))  # ذخیره کانفیگ و زمان ارسال
                     new_tg_name_json.append(i_url)
-                    god_tg_name = True                    
+                    god_tg_name = True
     if not god_tg_name:
         inv_tg_name_json.append(i_url)
     sem_pars.release()
@@ -209,15 +219,17 @@ codes = list(set(codes))
 
 processed_codes = list()
 
-for part in codes:
+for idx, (config, time_sent) in enumerate(codes, start=1):  # حالا codes شامل (config, time_sent) است
+    part = config  # فقط کانفیگ را می‌گیریم، نه tuple
+
+    # حالا می‌توانیم روی part که یک رشته است، از re.sub استفاده کنیم
     part = re.sub('%0A', '', part)
     part = re.sub('%250A', '', part)
     part = re.sub('%0D', '', part)
     part = requests.utils.unquote(requests.utils.unquote(part)).strip()
     part = re.sub(' ', '', part)
-    part = re.sub('', '', part)
-    part = re.sub(r'\x00', '', part)    
-    part = re.sub(r'\x01', '', part)    
+    part = re.sub(r'\x00', '', part)
+    part = re.sub(r'\x01', '', part)
     part = re.sub('amp;', '', part)
     part = re.sub('�', '', part)
     part = re.sub('fp=firefox', 'fp=chrome', part)
@@ -229,16 +241,14 @@ for part in codes:
     part = re.sub('fp=android', 'fp=chrome', part)
     part = re.sub('fp=randomized', 'fp=chrome', part)
     part = re.sub('fp=random', 'fp=chrome', part)
+
+    # حالا برای هر نوع کانفیگ پردازش را انجام می‌دهیم
     if "vmess://" in part:
         part = f'vmess://{part.split("vmess://")[1]}'
         processed_codes.append(part.strip())
         continue
     elif "vless://" in part:
         part = f'vless://{part.split("vless://")[1]}'
-#In Vless flow=xtls-rprx-direct is old and not actualy
-        if "flow=xtls-rprx-direct" in part:
-#            part = re.sub('flow=xtls-rprx-direct', 'flow=xtls-rprx-vision', part)
-            continue                      
         if "@" in part and ":" in part[8:]:
             processed_codes.append(part.strip())
         continue
@@ -292,7 +302,7 @@ for part in codes:
     elif "husi://" in part:
         part1 = f'husi://{part.split("husi://")[1]}'
         part0 = f'sn://{part.split("husi://")[1]}'
-        part2 = f'exclave://{part.split("husi://")[1]}'        
+        part2 = f'exclave://{part.split("husi://")[1]}'
         processed_codes.append(part0.strip())
         processed_codes.append(part1.strip())
         processed_codes.append(part2.strip())
@@ -336,7 +346,8 @@ for part in codes:
     elif "wg://" in part:
         part = f'wg://{part.split("wg://")[1]}'
         processed_codes.append(part.strip())
-        continue           
+        continue
+
 
 print(f'\nTrying to delete corrupted configurations...') 
 
@@ -388,8 +399,8 @@ with open("configs.txt", "w", encoding="utf-8") as file:
 # ایجاد فایل HTML برای نمایش کانفیگ‌ها
 processed_configs = []
 
-for idx, config in enumerate(processed_codes, start=1):
-    # تشخیص نوع کانفیگ
+# برای هر کانفیگ و زمان ارسال، اطلاعات مربوطه ذخیره می‌شود
+for idx, (config, time_sent) in enumerate(codes, start=1):  # حالا codes شامل کانفیگ و زمان است
     config_type = ""
     if config.startswith("vless://"):
         config_type = "vless"
@@ -406,11 +417,9 @@ for idx, config in enumerate(processed_codes, start=1):
     else:
         config_type = "unknown"
 
-    # استخراج کشور و کد کشور
     country, country_code = get_country_from_config(config)
-
-    # اضافه کردن اطلاعات به لیست پردازش‌شده
-    processed_configs.append((idx, config, config_type, country, country_code))
+    # ذخیره کانفیگ‌ها به همراه زمان ارسال
+    processed_configs.append((idx, config, config_type, country, country_code, time_sent))
 
 html_content = """
 <!DOCTYPE html>
@@ -546,7 +555,9 @@ html_content = """
 """
 
 # ساختن لیست کشورها برای فیلتر
-countries = sorted(set([country for _, _, _, country, _ in processed_configs]))
+# در اینجا شما در حال استخراج 6 مقدار از tuple ها هستید
+countries = sorted(set([country for _, _, _, country, _, _ in processed_configs]))
+
 for country in countries:
     html_content += f'<option value="{country}">{country}</option>\n'
 
@@ -567,7 +578,8 @@ html_content += """
 """
 
 # اضافه کردن کارت‌ها برای هر کانفیگ
-for idx, config, config_type, country, country_code in processed_configs:
+
+for idx, config, config_type, country, country_code, time_sent in processed_configs:
     # اگر کشور نامشخص باشد، پیش‌فرض ایران است
     if country_code == "unknown":
         country = "Unknown"
@@ -581,18 +593,12 @@ for idx, config, config_type, country, country_code in processed_configs:
             </h3>
             <div class="type">{config_type.upper()}</div>
             <div class="config" title="{config}">{config}</div>
+            <div class="time">زمان ارسال: {time_sent}</div> <!-- نمایش زمان ارسال -->
             <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
-                <svg aria-hidden="true" height="1em" preserveaspectratio="xMidYMid meet" role="img" viewbox="0 0 24 24" width="1em" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
-                    <g fill="none">
-                        <path d="M13 6.75V2H8.75A2.25 2.25 0 0 0 6.5 4.25v13a2.25 2.25 0 0 0 2.25 2.25h9A2.25 2.25 0 0 0 20 17.25V9h-4.75A2.25 2.25 0 0 1 13 6.75z" fill="currentColor"></path>
-                        <path d="M14.5 6.75V2.5l5 5h-4.25a.75.75 0 0 1-.75-.75z" fill="currentColor"></path>
-                    </g>
-                </svg>
                 کپی کردن
             </button>
         </div>
     """
-
 html_content += """
     </div>
     <script>
