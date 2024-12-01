@@ -487,7 +487,7 @@ html_content = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Aligns the content and buttons properly */
+            justify-content: space-between;
         }
 
         .config-card h3 {
@@ -572,11 +572,6 @@ html_content += """
             <option value="trojan">Trojan</option>
             <option value="wireguard">WireGuard</option>
         </select>
-        <label for="filter-time">مرتب‌سازی براساس زمان ارسال:</label>
-        <select id="filter-time" onchange="applyFilters()">
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-        </select>
     </div>
     <div class="container">
 """
@@ -596,7 +591,7 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
             </h3>
             <div class="type">{config_type.upper()}</div>
             <div class="config" title="{config}">{config}</div>
-            <div class="time">زمان ارسال: {time_sent}</div> <!-- نمایش زمان ارسال -->
+            <div class="time">زمان ارسال: {time_sent}</div>
             <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
                 کپی کردن
             </button>
@@ -605,36 +600,42 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
 html_content += """
     </div>
 <script>
-    function applyFilters() {
-        const filterCountry = document.getElementById('filter-country').value.toLowerCase();
-        const filterType = document.getElementById('filter-type').value.toLowerCase();
-        const filterTime = document.getElementById('filter-time').value.toLowerCase();
+    // مرتب‌سازی کارت‌ها براساس زمان نزولی هنگام بارگذاری صفحه
+    window.onload = function() {
         const container = document.querySelector('.container');
-        const cards = Array.from(document.querySelectorAll('.config-card')); // لیست کارت‌ها به آرایه تبدیل می‌شود
+        const cards = Array.from(document.querySelectorAll('.config-card'));
 
-        // مرتب‌سازی کارت‌ها براساس زمان
+        // مرتب‌سازی نزولی براساس زمان
         cards.sort((a, b) => {
             const timeA = new Date(a.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
             const timeB = new Date(b.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
-            return filterTime === 'asc' ? timeA - timeB : timeB - timeA; // مرتب‌سازی صعودی یا نزولی
+            return timeB - timeA; // مرتب‌سازی نزولی
         });
 
-        // حذف کارت‌های قبلی و نمایش کارت‌های مرتب‌شده
-        container.innerHTML = '';
+        // بازسازی کارت‌ها در کانتینر
+        container.innerHTML = ''; // پاک کردن کارت‌های موجود
+        cards.forEach(card => {
+            container.appendChild(card); // اضافه کردن کارت مرتب‌شده
+        });
+    };
+
+    // فیلتر بر اساس کشور و نوع
+    function applyFilters() {
+        const filterCountry = document.getElementById('filter-country').value.toLowerCase();
+        const filterType = document.getElementById('filter-type').value.toLowerCase();
+        const cards = document.querySelectorAll('.config-card');
+
         cards.forEach(card => {
             const cardCountry = card.getAttribute('data-country').toLowerCase();
             const cardType = card.getAttribute('data-type').toLowerCase();
 
-            // مقایسه فیلتر کشور و نوع
             const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
             const matchesType = (filterType === 'all' || cardType === filterType);
 
-            // اگر با فیلترها مطابقت داشت، کارت نمایش داده شود
             if (matchesCountry && matchesType) {
-                container.appendChild(card); // اضافه کردن کارت به کانتینر
                 card.style.display = 'block';
             } else {
-                card.style.display = 'none'; // مخفی کردن کارت
+                card.style.display = 'none';
             }
         });
     }
