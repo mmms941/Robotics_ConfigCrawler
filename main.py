@@ -11,7 +11,6 @@ from ping3 import ping
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from datetime import datetime
 # مسیر دیتابیس GeoLite2
 DB_PATH = "geolite2/GeoLite2-Country.mmdb"
 
@@ -122,6 +121,21 @@ def extract_server_from_config(config):
     except Exception as e:
         print(f"Error extracting server: {e}")
         return None
+
+# فیلتر کردن کانفیگ‌ها بر اساس طول عمر بیشتر از 2 ماه
+def filter_old_configs(processed_configs):
+    now = datetime.now()
+    two_months_ago = now - timedelta(days=60)  # 2 ماه معادل 60 روز
+
+    # فیلتر کردن کانفیگ‌ها که از 2 ماه بیشتر عمر دارند
+    return [config for config in processed_configs if datetime.strptime(config[5], "%Y/%m/%d %H:%M") > two_months_ago]
+
+# صفحه‌بندی کارت‌ها (400 کارت در هر صفحه)
+def paginate_configs(processed_configs, items_per_page=400):
+    # تعداد صفحات
+    num_pages = len(processed_configs) // items_per_page + (1 if len(processed_configs) % items_per_page != 0 else 0)
+    pages = [processed_configs[i * items_per_page: (i + 1) * items_per_page] for i in range(num_pages)]
+    return pages
 
 def substring_del(string_list):
     list1 = list(string_list)
@@ -517,6 +531,24 @@ html_content = """
             margin-bottom: 20px;
         }
 
+        .filter-container {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Iranyekan', sans-serif; /* تغییر فونت */
+            color: #ADEFD1; /* تغییر رنگ */
+        }
+
+        .filter-container label {
+            margin-left: 10px; /* فاصله بین متن و فیلتر */
+        }
+
+        .filter-container select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -595,78 +627,86 @@ html_content = """
 </head>
 <body>
     <h1> پروژه جمع‌آوری کانفیگ از تلگرام</h1>
+    <div class="filter-container">
+        <label for="filter-country">مرتب‌سازی براساس کشور:</label>
+        <select id="filter-country" onchange="applyFilters()">
+            <option value="all">All</option>
+"""
+
+# ساختن لیست کشورها برای فیلتر
+countries = sorted(set([country for _, _, _, country, _, _ in processed_configs]))
+
+for country in countries:
+    html_content += f'<option value="{country}">{country}</option>\n'
+
+html_content += """
+        </select>
+        <label for="filter-type">مرتب‌سازی براساس نوع:</label>
+        <select id="filter-type" onchange="applyFilters()">
+            <option value="all">All</option>
+            <option value="vless">VLESS</option>
+            <option value="vmess">VMESS</option>
+            <option value="hysteria2">Hysteria2</option>
+            <option value="ss">Shadowsocks</option>
+            <option value="trojan">Trojan</option>
+            <option value="wireguard">WireGuard</option>
+        </select>
+    </div>
     <div class="container">
 """
 
-# اضافه کردن کارت‌ها برای هر کانفیگ و پینگ
-for idx, config, config_type, country, country_code, time_sent in processed_configs:
-    # اگر کشور نامشخص باشد، پیش‌فرض ایران است
-    if country_code == "unknown":
-        country = "Unknown"
-        country_code = "aq"
-    flag_url = f"https://flagcdn.com/w40/{country_code}.png"
-    
-    # استخراج سرور و پینگ آن
-    server = extract_server_from_config(config)
-    ping_time = get_ping_time(server) if server else "Ping Failed"
-    
-    # اضافه کردن کارت با پینگ به HTML
-    html_content += f"""
-        <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
-            <h3>
-                <img src="{flag_url}" alt="{country} Flag">
-                {country}
-            </h3>
-            <div class="type">{config_type.upper()}</div>
-            <div class="config" title="{config}">{config}</div>
-            <div class="time">زمان ارسال: {time_sent}</div>
-            <div class="ping">پینگ: {ping_time}</div> <!-- نمایش پینگ -->
-            <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
-                کپی کردن
-            </button>
-        </div>
-    """
+# فیلتر کردن کانفیگ‌ها برای کانفیگ‌هایی که طول عمرشان از 2 ماه بیشتر است
+processed_configs = filter_old_configs(processed_configs)
+
+# صفحه‌بندی کانفیگ‌ها
+pages = paginate_configs(processed_configs)
+
+# اضافه کردن کارت‌ها برای هر صفحه
+for page_num, page in enumerate(pages, 1):
+    html_content += f"<h2>صفحه {page_num}</h2>"
+    for idx, config, config_type, country, country_code, time_sent in page:
+        # اگر کشور نامشخص باشد، پیش‌فرض ایران است
+        if country_code == "unknown":
+            country = "Unknown"
+            country_code = "aq"
+        flag_url = f"https://flagcdn.com/w40/{country_code}.png"
+        
+        # استخراج سرور و پینگ آن
+        server = extract_server_from_config(config)
+        ping_time = get_ping_time(server) if server else "Ping Failed"
+        
+        # اضافه کردن کارت با پینگ به HTML
+        html_content += f"""
+            <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
+                <h3>
+                    <img src="{flag_url}" alt="{country} Flag">
+                    {country}
+                </h3>
+                <div class="type">{config_type.upper()}</div>
+                <div class="time">زمان ارسال: {time_sent}</div>
+                <div class="ping">پینگ: {ping_time}</div>
+                <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
+                    کپی کردن
+                </button>
+            </div>
+        """
 html_content += """
     </div>
 <script>
-    // تابع کپی کردن
     function copyToClipboard(text, idx) {
         navigator.clipboard.writeText(text).then(() => {
-            // تغییر رنگ و متن دکمه
             const button = document.getElementById("k2button-" + idx);
-            button.style.backgroundColor = "#2ECC71"; // سبز
-            button.innerText = "با موفقیت کپی شد"; // تغییر متن
-
-            // بعد از 3 ثانیه به حالت اول برگرداندن
+            button.style.backgroundColor = "#2ECC71";
+            button.innerText = "با موفقیت کپی شد";
             setTimeout(() => {
-                button.style.backgroundColor = "#265df2"; // رنگ آبی
-                button.innerText = "کپی کردن"; // تغییر متن
+                button.style.backgroundColor = "#265df2";
+                button.innerText = "کپی کردن";
             }, 3000);
         }).catch(err => {
             console.error('Error:', err);
         });
     }
 
-    // مرتب‌سازی کارت‌ها براساس زمان نزولی هنگام بارگذاری صفحه
-    window.onload = function() {
-        const container = document.querySelector('.container');
-        const cards = Array.from(document.querySelectorAll('.config-card'));
-
-        // مرتب‌سازی نزولی براساس زمان
-        cards.sort((a, b) => {
-            const timeA = new Date(a.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
-            const timeB = new Date(b.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
-            return timeB - timeA; // مرتب‌سازی نزولی
-        });
-
-        // بازسازی کارت‌ها در کانتینر
-        container.innerHTML = ''; // پاک کردن کارت‌های موجود
-        cards.forEach(card => {
-            container.appendChild(card); // اضافه کردن کارت مرتب‌شده
-        });
-    };
-
-    // فیلتر بر اساس کشور و نوع
     function applyFilters() {
         const filterCountry = document.getElementById('filter-country').value.toLowerCase();
         const filterType = document.getElementById('filter-type').value.toLowerCase();
