@@ -131,13 +131,6 @@ def filter_old_configs(processed_configs):
     return [config for config in processed_configs if datetime.strptime(config[5], "%Y/%m/%d %H:%M") > two_months_ago]
 
 # صفحه‌بندی کارت‌ها (300 کارت در هر صفحه)
-def paginate_configs(processed_configs, items_per_page=300):
-    # تعداد صفحات
-    num_pages = len(processed_configs) // items_per_page + (1 if len(processed_configs) % items_per_page != 0 else 0)
-    pages = [processed_configs[i * items_per_page: (i + 1) * items_per_page] for i in range(num_pages)]
-    return pages
-
-
 def substring_del(string_list):
     list1 = list(string_list)
     list2 = list(string_list)
@@ -624,25 +617,6 @@ html_content = """
                 width: 100%;
             }
         }
-
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .pagination button {
-            background-color: #265df2;
-            color: white;
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .pagination button:hover {
-            background-color: #2ECC71;
-        }
     </style>
 </head>
 <body>
@@ -678,47 +652,36 @@ html_content += """
 # فیلتر کردن کانفیگ‌ها برای کانفیگ‌هایی که طول عمرشان از 2 ماه بیشتر است
 processed_configs = filter_old_configs(processed_configs)
 
-# صفحه‌بندی کانفیگ‌ها
-pages = paginate_configs(processed_configs)
+# مرتب‌سازی کانفیگ‌ها بر اساس تاریخ (نزولی)
+processed_configs.sort(key=lambda x: datetime.strptime(x[5], "%Y/%m/%d %H:%M"), reverse=True)
 
-# اضافه کردن کارت‌ها برای هر صفحه
-for page_num, page in enumerate(pages, 1):
-    html_content += f"<h2>صفحه {page_num}</h2>"
-    for idx, config, config_type, country, country_code, time_sent in page:
-        # اگر کشور نامشخص باشد، پیش‌فرض ایران است
-        if country_code == "unknown":
-            country = "Unknown"
-            country_code = "aq"
-        flag_url = f"https://flagcdn.com/w40/{country_code}.png"
-        
-        # استخراج سرور و پینگ آن
-        server = extract_server_from_config(config)
-        ping_time = get_ping_time(server) if server else "Ping Failed"
-        
-        # اضافه کردن کارت با پینگ به HTML
-        html_content += f"""
-            <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
-                <h3>
-                    <img src="{flag_url}" alt="{country} Flag">
-                    {country}
-                </h3>
-                <div class="type">{config_type.upper()}</div>
-                <div class="time">زمان ارسال: {time_sent}</div>
-                <div class="ping">پینگ: {ping_time}</div>
-                <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
-                    کپی کردن
-                </button>
-            </div>
-        """
-
-    # اضافه کردن دکمه‌های صفحه‌بندی
+# اضافه کردن کارت‌ها برای هر کانفیگ
+for idx, config, config_type, country, country_code, time_sent in processed_configs:
+    # اگر کشور نامشخص باشد، پیش‌فرض ایران است
+    if country_code == "unknown":
+        country = "Unknown"
+        country_code = "aq"
+    flag_url = f"https://flagcdn.com/w40/{country_code}.png"
+    
+    # استخراج سرور و پینگ آن
+    server = extract_server_from_config(config)
+    ping_time = get_ping_time(server) if server else "Ping Failed"
+    
+    # اضافه کردن کارت با پینگ به HTML
     html_content += f"""
-    <div class="pagination">
-        <button onclick="showPage({page_num - 1})" {('disabled' if page_num == 1 else '')}>قبلی</button>
-        <button onclick="showPage({page_num + 1})" {('disabled' if page_num == len(pages) else '')}>بعدی</button>
-    </div>
+        <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
+            <h3>
+                <img src="{flag_url}" alt="{country} Flag">
+                {country}
+            </h3>
+            <div class="type">{config_type.upper()}</div>
+            <div class="time">زمان ارسال: {time_sent}</div>
+            <div class="ping">پینگ: {ping_time}</div>
+            <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
+                کپی کردن
+            </button>
+        </div>
     """
-
 html_content += """
     </div>
 
@@ -737,24 +700,25 @@ html_content += """
         });
     }
 
-    function showPage(pageNum) {
-        const allPages = document.querySelectorAll(".container > .config-card");
-        
-        // Hide all pages
-        allPages.forEach(page => page.style.display = 'none');
-        
-        // Show the page that corresponds to the current page number
-        const pages = document.querySelectorAll(".container > .config-card");
-        let startIndex = (pageNum - 1) * 300;
-        let endIndex = pageNum * 300;
+    // فیلتر بر اساس کشور و نوع
+    function applyFilters() {
+        const filterCountry = document.getElementById('filter-country').value.toLowerCase();
+        const filterType = document.getElementById('filter-type').value.toLowerCase();
+        const cards = document.querySelectorAll('.config-card');
 
-        for (let i = startIndex; i < endIndex && i < pages.length; i++) {
-            pages[i].style.display = 'block';
-        }
-    }
+        cards.forEach(card => {
+            const cardCountry = card.getAttribute('data-country').toLowerCase();
+            const cardType = card.getAttribute('data-type').toLowerCase();
 
-    window.onload = function() {
-        showPage(1);  // Show the first page by default
+            const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
+            const matchesType = (filterType === 'all' || cardType === filterType);
+
+            if (matchesCountry && matchesType) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
     }
 </script>
 </body>
