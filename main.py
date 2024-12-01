@@ -609,34 +609,32 @@ html_content += """
         const filterCountry = document.getElementById('filter-country').value.toLowerCase();
         const filterType = document.getElementById('filter-type').value.toLowerCase();
         const filterTime = document.getElementById('filter-time').value.toLowerCase();
-        const cards = document.querySelectorAll('.config-card');
+        const container = document.querySelector('.container');
+        const cards = Array.from(document.querySelectorAll('.config-card')); // لیست کارت‌ها به آرایه تبدیل می‌شود
 
+        // مرتب‌سازی کارت‌ها براساس زمان
+        cards.sort((a, b) => {
+            const timeA = new Date(a.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
+            const timeB = new Date(b.getAttribute('data-time').replace(' ', 'T').replace(/\//g, '-'));
+            return filterTime === 'asc' ? timeA - timeB : timeB - timeA; // مرتب‌سازی صعودی یا نزولی
+        });
+
+        // حذف کارت‌های قبلی و نمایش کارت‌های مرتب‌شده
+        container.innerHTML = '';
         cards.forEach(card => {
             const cardCountry = card.getAttribute('data-country').toLowerCase();
             const cardType = card.getAttribute('data-type').toLowerCase();
-            const cardTime = card.getAttribute('data-time'); // زمان ارسال در قالب YYYY/MM/DD HH:MM
 
-            // اصلاح فرمت زمان برای جاوااسکریپت
-            const fixedCardTime = cardTime.replace(' ', 'T').replace(/\//g, '-');
-            const cardDate = new Date(fixedCardTime); // تبدیل به تاریخ
-
-            // مقایسه با فیلتر کشور و نوع
+            // مقایسه فیلتر کشور و نوع
             const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
             const matchesType = (filterType === 'all' || cardType === filterType);
 
-            // مقایسه زمان ارسال
-            let matchesTime = true; // پیش‌فرض: نمایش کارت
-            if (filterTime === 'asc') {
-                matchesTime = cardDate <= new Date(); // تاریخ‌های قدیمی‌تر
-            } else if (filterTime === 'desc') {
-                matchesTime = cardDate >= new Date(); // تاریخ‌های جدیدتر
-            }
-
-            // نمایش یا مخفی کردن کارت
-            if (matchesCountry && matchesType && matchesTime) {
+            // اگر با فیلترها مطابقت داشت، کارت نمایش داده شود
+            if (matchesCountry && matchesType) {
+                container.appendChild(card); // اضافه کردن کارت به کانتینر
                 card.style.display = 'block';
             } else {
-                card.style.display = 'none';
+                card.style.display = 'none'; // مخفی کردن کارت
             }
         });
     }
