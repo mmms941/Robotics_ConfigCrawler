@@ -604,61 +604,43 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
     """
 html_content += """
     </div>
-    <script>
-        // تابع کپی کردن متن
-        function copyToClipboard(text, idx) {
-            navigator.clipboard.writeText(text).then(() => {
-                // تغییر رنگ و متن دکمه
-                const button = document.getElementById("k2button-" + idx);
-                button.style.backgroundColor = "#2ECC71"; // سبز
-                button.innerText = "با موفقیت کپی شد"; // تغییر متن
+<script>
+    function applyFilters() {
+        const filterCountry = document.getElementById('filter-country').value.toLowerCase();
+        const filterType = document.getElementById('filter-type').value.toLowerCase();
+        const filterTime = document.getElementById('filter-time').value.toLowerCase();
+        const cards = document.querySelectorAll('.config-card');
 
-                // بعد از 3 ثانیه به حالت اول برگرداندن
-                setTimeout(() => {
-                    button.style.backgroundColor = "#265df2"; // رنگ آبی
-                    button.innerText = "کپی کردن"; // تغییر متن
-                }, 3000);
-            }).catch(err => {
-                console.log('Error:', err);
-            });
-        }
+        cards.forEach(card => {
+            const cardCountry = card.getAttribute('data-country').toLowerCase();
+            const cardType = card.getAttribute('data-type').toLowerCase();
+            const cardTime = card.getAttribute('data-time'); // زمان ارسال در قالب YYYY/MM/DD HH:MM
 
-        // تابع کلی برای اعمال فیلترها
-        function applyFilters() {
-            const filterCountry = document.getElementById('filter-country').value.toLowerCase();
-            const filterType = document.getElementById('filter-type').value.toLowerCase();
-            const filterTime = document.getElementById('filter-time').value.toLowerCase();
-            const cards = document.querySelectorAll('.config-card');
+            // اصلاح فرمت زمان برای جاوااسکریپت
+            const fixedCardTime = cardTime.replace(' ', 'T').replace(/\//g, '-');
+            const cardDate = new Date(fixedCardTime); // تبدیل به تاریخ
 
-            // گرفتن مقادیر از data-attributes
-            cards.forEach(card => {
-                const cardCountry = card.getAttribute('data-country').toLowerCase();
-                const cardType = card.getAttribute('data-type').toLowerCase();
-                const cardTime = card.getAttribute('data-time');  // زمان ارسال در قالب YYYY/MM/DD HH:MM
+            // مقایسه با فیلتر کشور و نوع
+            const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
+            const matchesType = (filterType === 'all' || cardType === filterType);
 
-                // مقایسه با فیلتر کشور و نوع
-                const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
-                const matchesType = (filterType === 'all' || cardType === filterType);
+            // مقایسه زمان ارسال
+            let matchesTime = true; // پیش‌فرض: نمایش کارت
+            if (filterTime === 'asc') {
+                matchesTime = cardDate <= new Date(); // تاریخ‌های قدیمی‌تر
+            } else if (filterTime === 'desc') {
+                matchesTime = cardDate >= new Date(); // تاریخ‌های جدیدتر
+            }
 
-                // مقایسه زمان ارسال
-                const cardDate = new Date(cardTime);  // تبدیل زمان به تاریخ
-
-                let matchesTime = false;
-                if (filterTime === 'asc') {
-                    matchesTime = cardDate <= new Date();  // برای ascending تاریخ‌های قدیمی‌تر نمایش داده شوند
-                } else if (filterTime === 'desc') {
-                    matchesTime = cardDate >= new Date();  // برای descending تاریخ‌های جدیدتر نمایش داده شوند
-                }
-
-                // نمایش یا پنهان کردن کارت‌ها بر اساس فیلترها
-                if (matchesCountry && matchesType && matchesTime) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-    </script>
+            // نمایش یا مخفی کردن کارت
+            if (matchesCountry && matchesType && matchesTime) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
 </body>
 </html>
 """
