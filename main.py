@@ -555,7 +555,6 @@ html_content = """
 """
 
 # ساختن لیست کشورها برای فیلتر
-# در اینجا شما در حال استخراج 6 مقدار از tuple ها هستید
 countries = sorted(set([country for _, _, _, country, _, _ in processed_configs]))
 
 for country in countries:
@@ -573,12 +572,16 @@ html_content += """
             <option value="trojan">Trojan</option>
             <option value="wireguard">WireGuard</option>
         </select>
+        <label for="filter-time">مرتب‌سازی براساس زمان ارسال:</label>
+        <select id="filter-time" onchange="applyFilters()">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
     </div>
     <div class="container">
 """
 
 # اضافه کردن کارت‌ها برای هر کانفیگ
-
 for idx, config, config_type, country, country_code, time_sent in processed_configs:
     # اگر کشور نامشخص باشد، پیش‌فرض ایران است
     if country_code == "unknown":
@@ -586,7 +589,7 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
         country_code = "aq"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
     html_content += f"""
-        <div class="config-card" data-type="{config_type}" data-country="{country}">
+        <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
             <h3>
                 <img src="{flag_url}" alt="{country} Flag">
                 {country}
@@ -624,18 +627,23 @@ html_content += """
         function applyFilters() {
             const filterCountry = document.getElementById('filter-country').value.toLowerCase();
             const filterType = document.getElementById('filter-type').value.toLowerCase();
+            const filterTime = document.getElementById('filter-time').value.toLowerCase();
             const cards = document.querySelectorAll('.config-card');
 
             cards.forEach(card => {
                 const cardCountry = card.getAttribute('data-country').toLowerCase();
                 const cardType = card.getAttribute('data-type').toLowerCase();
+                const cardTime = card.getAttribute('data-time');
 
                 // بررسی تطابق کارت با هر دو فیلتر
                 const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
                 const matchesType = (filterType === 'all' || cardType === filterType);
 
-                // نمایش کارت اگر با هر دو فیلتر مطابقت داشته باشد
-                if (matchesCountry && matchesType) {
+                // فیلتر براساس زمان (ascending یا descending)
+                const matchesTime = (filterTime === 'asc') ? (new Date(cardTime) <= new Date()) : (new Date(cardTime) >= new Date());
+
+                // نمایش کارت اگر با هر سه فیلتر مطابقت داشته باشد
+                if (matchesCountry && matchesType && matchesTime) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
@@ -646,6 +654,7 @@ html_content += """
         // فراخوانی تابع کلی هنگام تغییر در هر یک از فیلترها
         document.getElementById('filter-country').addEventListener('change', applyFilters);
         document.getElementById('filter-type').addEventListener('change', applyFilters);
+        document.getElementById('filter-time').addEventListener('change', applyFilters);
     </script>
 </body>
 </html>
