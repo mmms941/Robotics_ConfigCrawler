@@ -630,19 +630,27 @@ html_content += """
             const filterTime = document.getElementById('filter-time').value.toLowerCase();
             const cards = document.querySelectorAll('.config-card');
 
+            // گرفتن مقادیر از data-attributes
             cards.forEach(card => {
                 const cardCountry = card.getAttribute('data-country').toLowerCase();
                 const cardType = card.getAttribute('data-type').toLowerCase();
-                const cardTime = card.getAttribute('data-time');
+                const cardTime = card.getAttribute('data-time');  // زمان ارسال در قالب YYYY/MM/DD HH:MM
 
-                // بررسی تطابق کارت با هر دو فیلتر
+                // مقایسه با فیلتر کشور و نوع
                 const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
                 const matchesType = (filterType === 'all' || cardType === filterType);
 
-                // فیلتر براساس زمان (ascending یا descending)
-                const matchesTime = (filterTime === 'asc') ? (new Date(cardTime) <= new Date()) : (new Date(cardTime) >= new Date());
+                // مقایسه زمان ارسال
+                const cardDate = new Date(cardTime);  // تبدیل زمان به تاریخ
 
-                // نمایش کارت اگر با هر سه فیلتر مطابقت داشته باشد
+                let matchesTime = false;
+                if (filterTime === 'asc') {
+                    matchesTime = cardDate <= new Date();  // برای ascending تاریخ‌های قدیمی‌تر نمایش داده شوند
+                } else if (filterTime === 'desc') {
+                    matchesTime = cardDate >= new Date();  // برای descending تاریخ‌های جدیدتر نمایش داده شوند
+                }
+
+                // نمایش یا پنهان کردن کارت‌ها بر اساس فیلترها
                 if (matchesCountry && matchesType && matchesTime) {
                     card.style.display = 'block';
                 } else {
@@ -650,11 +658,6 @@ html_content += """
                 }
             });
         }
-
-        // فراخوانی تابع کلی هنگام تغییر در هر یک از فیلترها
-        document.getElementById('filter-country').addEventListener('change', applyFilters);
-        document.getElementById('filter-type').addEventListener('change', applyFilters);
-        document.getElementById('filter-time').addEventListener('change', applyFilters);
     </script>
 </body>
 </html>
