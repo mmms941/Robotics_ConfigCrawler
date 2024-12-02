@@ -514,7 +514,7 @@ html_content = """
         body {
             font-family: 'Tahoma', sans-serif;
             background-color: #00203F; /* تغییر رنگ پس‌زمینه */
-            color: #ADEFD1; /* تغییر رنگ متن */
+            color: #00203F; /* رنگ پیش‌فرض متن کارت‌ها */
             margin: 20px;
         }
 
@@ -527,10 +527,16 @@ html_content = """
 
         .update-info {
             font-family: 'Iranyekan', sans-serif;
-            text-align: right;
-            font-size: 14px;
-            color: #ADEFD1;
-            margin-bottom: 20px;
+   	    font-size: 14px;
+   	    color: #fff; /* رنگ متن سفید */
+   	    display: flex; /* استفاده از فِلکس برای نمایش در یک خط */
+   	    justify-content: flex-start; /* متن‌ها به چپ چین شوند */
+   	    gap: 20px; /* فاصله بین متن‌ها */
+   	    margin-bottom: 20px;
+        }
+
+        .update-info span {
+            margin-left: 10px; /* فاصله بین اطلاعات */
         }
 
         .filter-container {
@@ -559,7 +565,7 @@ html_content = """
         }
 
         .config-card {
-            background-color: #ADEFD1;
+            background-color: #ADEFD1; /* تغییر رنگ پس‌زمینه کارت */
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
@@ -569,6 +575,7 @@ html_content = """
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            color: #00203F; /* بازگرداندن رنگ کارت‌ها */
         }
 
         .config-card h3 {
@@ -594,11 +601,6 @@ html_content = """
             word-break: break-word;
         }
 
-        .k2-copy-button svg {
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
         .k2-copy-button {
             font-family: 'Iranyekan', sans-serif;
             height: 45px;
@@ -610,7 +612,7 @@ html_content = """
             border-radius: 8px;
             font-size: 17px;
             font-weight: 400;
-            margin: 8px 0;
+            margin: 8px auto; /* دکمه به وسط چین منتقل شد */
             cursor: pointer;
             transition: all 0.4s ease;
         }
@@ -628,8 +630,8 @@ html_content = """
 </head>
 <body>
     <div class="update-info">
-        <p>تا آپدیت جدید: <span id="time-to-update"></span> دقیقه مانده است</p>
-        <p>آخرین آپدیت: <span id="last-update"></span></p>
+        <span>آخرین آپدیت: <span id="last-update"></span></span>
+        <span>تا آپدیت جدید: <span id="time-to-update"></span> دقیقه مانده است</span>
     </div>
     <h1>پروژه جمع‌آوری کانفیگ از تلگرام</h1>
     <div class="filter-container">
