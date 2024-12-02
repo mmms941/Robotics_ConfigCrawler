@@ -649,25 +649,26 @@ html_content += """
     <div class="container">
 """
 
-# فیلتر کردن کانفیگ‌ها برای کانفیگ‌هایی که طول عمرشان از 2 ماه بیشتر است
-processed_configs = filter_old_configs(processed_configs)
-
-# مرتب‌سازی کانفیگ‌ها بر اساس تاریخ (نزولی)
+# مرتب‌سازی کانفیگ‌ها براساس تاریخ (نزولی)
 processed_configs.sort(key=lambda x: datetime.strptime(x[5], "%Y/%m/%d %H:%M"), reverse=True)
 
 # اضافه کردن کارت‌ها برای هر کانفیگ
 for idx, config, config_type, country, country_code, time_sent in processed_configs:
+    # استخراج سرور و پینگ آن
+    server = extract_server_from_config(config)
+    ping_time = get_ping_time(server) if server else "Ping Failed"
+    
+    # فقط کانفیگ‌هایی که پینگ موفق دارند به HTML اضافه شوند
+    if ping_time == "Ping Failed":
+        continue  # از این کانفیگ رد می‌شویم
+    
     # اگر کشور نامشخص باشد، پیش‌فرض ایران است
     if country_code == "unknown":
         country = "Unknown"
         country_code = "aq"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
     
-    # استخراج سرور و پینگ آن
-    server = extract_server_from_config(config)
-    ping_time = get_ping_time(server) if server else "Ping Failed"
-    
-    # اضافه کردن کارت با پینگ به HTML
+    # اضافه کردن کارت به HTML
     html_content += f"""
         <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
             <h3>
