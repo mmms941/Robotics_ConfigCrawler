@@ -514,13 +514,21 @@ html_content = """
         body {
             font-family: 'Tahoma', sans-serif;
             background-color: #00203F; /* تغییر رنگ پس‌زمینه */
-            color: #00203F; /* تغییر رنگ متن */
+            color: #ADEFD1; /* تغییر رنگ متن */
             margin: 20px;
         }
 
         h1 {
             font-family: 'Iranyekan', sans-serif; /* تغییر فونت h1 */
-            text-align: center; /* وسط‌چین کردن */
+            text-align: center;
+            color: #ADEFD1;
+            margin-bottom: 20px;
+        }
+
+        .update-info {
+            font-family: 'Iranyekan', sans-serif;
+            text-align: right;
+            font-size: 14px;
             color: #ADEFD1;
             margin-bottom: 20px;
         }
@@ -528,12 +536,12 @@ html_content = """
         .filter-container {
             text-align: center;
             margin-bottom: 20px;
-            font-family: 'Iranyekan', sans-serif; /* تغییر فونت */
-            color: #ADEFD1; /* تغییر رنگ */
+            font-family: 'Iranyekan', sans-serif;
+            color: #ADEFD1;
         }
 
         .filter-container label {
-            margin-left: 10px; /* فاصله بین متن و فیلتر */
+            margin-left: 10px;
         }
 
         .filter-container select {
@@ -551,7 +559,7 @@ html_content = """
         }
 
         .config-card {
-            background-color: #ADEFD1; /* تغییر رنگ پس‌زمینه */
+            background-color: #ADEFD1;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
@@ -588,11 +596,11 @@ html_content = """
 
         .k2-copy-button svg {
             margin-right: 10px;
-            vertical-align: middle; /* Align svg properly with the text */
+            vertical-align: middle;
         }
 
         .k2-copy-button {
-            font-family: 'Iranyekan', sans-serif; /* تغییر فونت دکمه‌ها به Iranyekan */
+            font-family: 'Iranyekan', sans-serif;
             height: 45px;
             width: 155px;
             color: #fff;
@@ -605,7 +613,6 @@ html_content = """
             margin: 8px 0;
             cursor: pointer;
             transition: all 0.4s ease;
-            align-self: center; /* Center the button in the card */
         }
 
         .k2-copy-button:hover {
@@ -620,16 +627,19 @@ html_content = """
     </style>
 </head>
 <body>
-    <h1> پروژه جمع‌آوری کانفیگ از تلگرام</h1>
+    <div class="update-info">
+        <p>تا آپدیت جدید: <span id="time-to-update"></span> دقیقه مانده است</p>
+        <p>آخرین آپدیت: <span id="last-update"></span></p>
+    </div>
+    <h1>پروژه جمع‌آوری کانفیگ از تلگرام</h1>
     <div class="filter-container">
         <label for="filter-country">مرتب‌سازی براساس کشور:</label>
         <select id="filter-country" onchange="applyFilters()">
             <option value="all">All</option>
 """
 
-# ساختن لیست کشورها برای فیلتر
+# اضافه کردن لیست کشورها
 countries = sorted(set([country for _, _, _, country, _, _ in processed_configs]))
-
 for country in countries:
     html_content += f'<option value="{country}">{country}</option>\n'
 
@@ -652,23 +662,21 @@ html_content += """
 # مرتب‌سازی کانفیگ‌ها براساس تاریخ (نزولی)
 processed_configs.sort(key=lambda x: datetime.strptime(x[5], "%Y/%m/%d %H:%M"), reverse=True)
 
-# اضافه کردن کارت‌ها برای هر کانفیگ
+# اضافه کردن کارت‌ها
 for idx, config, config_type, country, country_code, time_sent in processed_configs:
-    # استخراج سرور و پینگ آن
-    server = extract_server_from_config(config)
-    ping_time = get_ping_time(server) if server else "Ping Failed"
-    
-    # فقط کانفیگ‌هایی که پینگ موفق دارند به HTML اضافه شوند
-    if ping_time == "Ping Failed":
-        continue  # از این کانفیگ رد می‌شویم
-    
-    # اگر کشور نامشخص باشد، پیش‌فرض ایران است
+    # اگر کشور نامشخص باشد
     if country_code == "unknown":
         country = "Unknown"
         country_code = "aq"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
-    
-    # اضافه کردن کارت به HTML
+
+    # استخراج پینگ
+    server = extract_server_from_config(config)
+    ping_time = get_ping_time(server) if server else "Ping Failed"
+    if ping_time == "Ping Failed":
+        continue  # کانفیگ‌هایی با پینگ ناموفق حذف می‌شوند
+
+    # ساخت کارت
     html_content += f"""
         <div class="config-card" data-type="{config_type}" data-country="{country}" data-time="{time_sent}">
             <h3>
@@ -683,10 +691,28 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
             </button>
         </div>
     """
+
 html_content += """
     </div>
 
 <script>
+    function updateTime() {
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const timeToNextUpdate = 59 - minutes;
+
+        // محاسبه زمان باقی‌مانده
+        document.getElementById("time-to-update").textContent = timeToNextUpdate;
+
+        // محاسبه زمان آخرین آپدیت
+        const lastUpdateHour = now.getHours();
+        document.getElementById("last-update").textContent = `${lastUpdateHour}:00`;
+    }
+
+    // به‌روزرسانی زمان
+    updateTime();
+    setInterval(updateTime, 60000);
+
     function copyToClipboard(text, idx) {
         navigator.clipboard.writeText(text).then(() => {
             const button = document.getElementById("k2button-" + idx);
@@ -696,12 +722,9 @@ html_content += """
                 button.style.backgroundColor = "#265df2";
                 button.innerText = "کپی کردن";
             }, 3000);
-        }).catch(err => {
-            console.error('Error:', err);
-        });
+        }).catch(err => console.error("Error copying to clipboard:", err));
     }
 
-    // فیلتر بر اساس کشور و نوع
     function applyFilters() {
         const filterCountry = document.getElementById('filter-country').value.toLowerCase();
         const filterType = document.getElementById('filter-type').value.toLowerCase();
@@ -714,18 +737,13 @@ html_content += """
             const matchesCountry = (filterCountry === 'all' || cardCountry === filterCountry);
             const matchesType = (filterType === 'all' || cardType === filterType);
 
-            if (matchesCountry && matchesType) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+            card.style.display = matchesCountry && matchesType ? 'block' : 'none';
         });
     }
 </script>
 </body>
 </html>
 """
-
 
 # ذخیره فایل HTML
 with open("index.html", "w", encoding="utf-8") as html_file:
