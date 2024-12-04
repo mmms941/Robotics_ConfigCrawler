@@ -56,7 +56,6 @@ def get_country_from_config(config_url):
         country_code = response.country.iso_code.lower() if response.country and response.country.iso_code else "unknown"
         return country_name, country_code
     except Exception as e:
-        print(f"Error in get_country_from_config: {e}")  # لاگ خطا برای اشکال‌زدایی
         return "Unknown", "unknown"  # در صورت بروز هرگونه خطا
 
 def get_ping_time(server):
@@ -71,7 +70,6 @@ def get_ping_time(server):
         return f"{round(result * 1000, 2)} ms"  # تبدیل زمان به میلی‌ثانیه
     except Exception as e:
         return "Ping Failed"  # در صورت بروز خطا
-
 def extract_server_from_config(config):
     """
     استخراج آدرس سرور از کانفیگ‌های مختلف.
@@ -83,45 +81,33 @@ def extract_server_from_config(config):
             # اطمینان از اینکه داده‌ها صحیح هستند و سرور وجود دارد
             server = re.search(r'"add":"([^"]+)"', decoded)
             if server:
-                print(f"Server found for vmess: {server.group(1)}")
                 return server.group(1)
-            else:
-                raise ValueError("Server address not found in vmess config.")
         
         elif config.startswith("vless://"):
             # استخراج سرور vless
             parts = config.split('@')
             if len(parts) > 1:
-                print(f"Server found for vless: {parts[1].split(':')[0]}")
                 return parts[1].split(':')[0]
-            else:
-                raise ValueError("Invalid vless config format.")
         
         elif config.startswith("trojan://"):
             # استخراج سرور trojan
             parts = config.split('@')
             if len(parts) > 1:
-                print(f"Server found for trojan: {parts[1].split(':')[0]}")
                 return parts[1].split(':')[0]
-            else:
-                raise ValueError("Invalid trojan config format.")
         
         elif config.startswith("ss://"):
             # رمزگشایی Shadowsocks
             parts = config.split('@')
             if len(parts) > 1:
                 decoded = base64.b64decode(parts[0][5:]).decode('utf-8')
-                print(f"Server found for ss: {decoded.split(':')[1].split('@')[1]}")
                 return decoded.split(':')[1].split('@')[1]
-            else:
-                raise ValueError("Invalid ss config format.")
         
         else:
-            raise ValueError("Unsupported config type.")
-    except Exception as e:
-        print(f"Error extracting server: {e}")
-        return None
-
+            return None  # به‌جای چاپ ارور یا raise، فقط None برگردانده می‌شود
+    
+    except Exception:
+        # هیچ پیام خطایی چاپ نمی‌شود
+        return None  # در صورت بروز خطا، تنها None برگردانده می‌شود
 # فیلتر کردن کانفیگ‌ها بر اساس طول عمر بیشتر از 2 ماه
 def filter_old_configs(processed_configs):
     now = datetime.now()
@@ -469,6 +455,7 @@ with open("configs.txt", "w", encoding="utf-8") as file:
     for code in processed_codes:
         file.write(code.encode("utf-8").decode("utf-8") + "\n")
 
+print (f'\nStart Checking Configs Ping...')
 # ایجاد فایل HTML برای نمایش کانفیگ‌ها
 processed_configs = []
 
