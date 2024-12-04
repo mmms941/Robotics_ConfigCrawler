@@ -11,7 +11,7 @@ from ping3 import ping
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-# مسیر دیتابیس GeoLite2
+
 DB_PATH = "geolite2/GeoLite2-Country.mmdb"
 
 requests.post = lambda url, **kwargs: requests.request(
@@ -32,14 +32,13 @@ def json_load(path):
     with open(path, 'r', encoding="utf-8") as file:
         list_content = json.load(file)
     return list_content
+
 # تابع استخراج کشور از کانفیگ
 def get_country_from_config(config_url):
     try:
-        # باز کردن دیتابیس
         reader = geoip2.database.Reader(DB_PATH)
 
-        # استخراج IP با استفاده از regex
-        pattern = r"@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"  # الگو برای IP بعد از @
+        pattern = r"@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"  
         match = re.search(pattern, config_url)
         
         if not match:
@@ -59,10 +58,6 @@ def get_country_from_config(config_url):
         return "Unknown", "unknown"  # در صورت بروز هرگونه خطا
 
 def get_ping_time(server):
-    """
-    گرفتن پینگ از سرور.
-    اگر سرور در دسترس نباشد، مقدار پیش‌فرض "Ping Failed" برمی‌گردد.
-    """
     try:
         result = ping(server, timeout=2)
         if result is None:
@@ -70,15 +65,13 @@ def get_ping_time(server):
         return f"{round(result * 1000, 2)} ms"  # تبدیل زمان به میلی‌ثانیه
     except Exception as e:
         return "Ping Failed"  # در صورت بروز خطا
+
+# استخراج آدرس سرور از کانفیگ‌های مختلف
 def extract_server_from_config(config):
-    """
-    استخراج آدرس سرور از کانفیگ‌های مختلف.
-    """
     try:
         if config.startswith("vmess://"):
             # رمزگشایی vmess
             decoded = base64.b64decode(config[8:]).decode('utf-8')
-            # اطمینان از اینکه داده‌ها صحیح هستند و سرور وجود دارد
             server = re.search(r'"add":"([^"]+)"', decoded)
             if server:
                 return server.group(1)
@@ -103,20 +96,17 @@ def extract_server_from_config(config):
                 return decoded.split(':')[1].split('@')[1]
         
         else:
-            return None  # به‌جای چاپ ارور یا raise، فقط None برگردانده می‌شود
+            return None 
     
     except Exception:
-        # هیچ پیام خطایی چاپ نمی‌شود
-        return None  # در صورت بروز خطا، تنها None برگردانده می‌شود
+        return None
 # فیلتر کردن کانفیگ‌ها بر اساس طول عمر بیشتر از 2 ماه
 def filter_old_configs(processed_configs):
     now = datetime.now()
-    two_months_ago = now - timedelta(days=60)  # 2 ماه معادل 60 روز
-
-    # فیلتر کردن کانفیگ‌ها که از 2 ماه بیشتر عمر دارند
+    two_months_ago = now - timedelta(days=60) 
     return [config for config in processed_configs if datetime.strptime(config[5], "%Y/%m/%d %H:%M") > two_months_ago]
 
-# صفحه‌بندی کارت‌ها (300 کارت در هر صفحه)
+# صفحه‌بندی html (300 کارت در هر صفحه)
 def substring_del(string_list):
     list1 = list(string_list)
     list2 = list(string_list)
@@ -132,43 +122,30 @@ def substring_del(string_list):
                 break
     out = list(set(string_list)-set(out))
     return out
-
 tg_name_json = json_load('tg channels.json')
 inv_tg_name_json = json_load('blacklist channels.json')
-
 inv_tg_name_json[:] = [x for x in inv_tg_name_json if len(x) >= 5]
 inv_tg_name_json = list(set(inv_tg_name_json)-set(tg_name_json))
-
 thrd_pars = 5
 pars_dp = 1
-
 print(f'\nTotal channel names in tg channels.json         - {len(tg_name_json)}')
 print(f'Total channel names in blacklist channels.json - {len(inv_tg_name_json)}')
-
 use_inv_tc = 'n'
-
 start_time = datetime.now()
-
 if use_inv_tc == 'y':
     tg_name_json.extend(inv_tg_name_json)
     inv_tg_name_json.clear()
     tg_name_json = list(set(tg_name_json))
     tg_name_json = sorted(tg_name_json)
-
 sem_pars = threading.Semaphore(thrd_pars)
-
 config_all = list()
 tg_name = list()
 new_tg_name_json = list()
-
 print(f'Try get new tg channels name from proxy configs in configs.txt...')
-
 with open("configs.txt", "r", encoding="utf-8") as config_all_file:
     config_all = config_all_file.readlines()
-
 pattern_telegram_user = r'(?:@)(\w{5,})|(?:%40)(\w{5,})|(?:t\.me\/)(\w{5,})|(?:t\.me%2F)(\w{5,})|(?:t\.me-)(\w{5,})'
 pattern_datbef = re.compile(r'(?:data-before=")(\d*)')
-
 for config in config_all:
     if config.startswith('vmess://'):
         try:
@@ -185,7 +162,7 @@ for config in config_all:
         matches_usersname = re.findall(pattern_telegram_user, base64.b64decode(config).decode("utf-8"), re.IGNORECASE)
     except:
         pass
-    
+
     for index, element in enumerate(matches_usersname):
         if element[0] != '':
             tg_name.append(element[0].lower().encode('ascii', 'ignore').decode())
@@ -212,9 +189,9 @@ with open('tg channels.json', 'w', encoding="utf-8") as telegram_channels_file:
     json.dump(tg_name_json, telegram_channels_file, indent = 4)
 
 print(f'\nSearch for new names is over - {str(datetime.now() - start_time).split(".")[0]}')
-
 print(f'\nStart Parsing...\n')
 
+# استخراج کانفیگ ها از کانال های تلگرام
 def process(i_url):
     sem_pars.acquire()
     html_pages = list()
@@ -278,10 +255,8 @@ codes = list(set(codes))
 
 processed_codes = list()
 
-for idx, (config, time_sent) in enumerate(codes, start=1):  # حالا codes شامل (config, time_sent) است
-    part = config  # فقط کانفیگ را می‌گیریم، نه tuple
-
-    # حالا می‌توانیم روی part که یک رشته است، از re.sub استفاده کنیم
+for idx, (config, time_sent) in enumerate(codes, start=1):  
+    part = config
     part = re.sub('%0A', '', part)
     part = re.sub('%250A', '', part)
     part = re.sub('%0D', '', part)
@@ -407,7 +382,6 @@ for idx, (config, time_sent) in enumerate(codes, start=1):  # حالا codes ش�
         processed_codes.append(part.strip())
         continue
 
-
 print(f'\nTrying to delete corrupted configurations...') 
 
 processed_codes = list(set(processed_codes))
@@ -460,7 +434,7 @@ print (f'\nStart Checking Configs Ping...')
 processed_configs = []
 
 # برای هر کانفیگ و زمان ارسال، اطلاعات مربوطه ذخیره می‌شود
-for idx, (config, time_sent) in enumerate(codes, start=1):  # حالا codes شامل کانفیگ و زمان است
+for idx, (config, time_sent) in enumerate(codes, start=1):  
     config_type = ""
     if config.startswith("vless://"):
         config_type = "vless"
@@ -515,15 +489,15 @@ html_content = """
         .update-info {
             font-family: 'Iranyekan', sans-serif;
    	    font-size: 14px;
-   	    color: #fff; /* رنگ متن سفید */
-   	    display: flex; /* استفاده از فِلکس برای نمایش در یک خط */
-   	    justify-content: flex-start; /* متن‌ها به چپ چین شوند */
-   	    gap: 20px; /* فاصله بین متن‌ها */
+   	    color: #fff; 
+   	    display: flex; 
+   	    justify-content: flex-start; 
+   	    gap: 20px; 
    	    margin-bottom: 20px;
         }
 
         .update-info span {
-            margin-left: 10px; /* فاصله بین اطلاعات */
+            margin-left: 10px; 
         }
 
         .filter-container {
@@ -552,7 +526,7 @@ html_content = """
         }
 
         .config-card {
-            background-color: #ADEFD1; /* تغییر رنگ پس‌زمینه کارت */
+            background-color: #ADEFD1; 
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
@@ -562,7 +536,7 @@ html_content = """
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            color: #00203F; /* بازگرداندن رنگ کارت‌ها */
+            color: #00203F; 
         }
 
         .config-card h3 {
@@ -599,7 +573,7 @@ html_content = """
             border-radius: 8px;
             font-size: 17px;
             font-weight: 400;
-            margin: 8px auto; /* دکمه به وسط چین منتقل شد */
+            margin: 8px auto; 
             cursor: pointer;
             transition: all 0.4s ease;
         }
@@ -739,6 +713,4 @@ with open("index.html", "w", encoding="utf-8") as html_file:
     html_file.write(html_content)
 print(f'\nHTML file (index.html) has been created.')
 print(f'\nTime spent - {str(datetime.now() - start_time).split(".")[0]}')
-#print(f'\nTime spent - {timedelta(seconds=int((datetime.now() - start_time).total_seconds()))}')
-
 print(f'\n...FINISH...')
