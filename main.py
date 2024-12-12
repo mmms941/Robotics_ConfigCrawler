@@ -624,7 +624,10 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
         country = "Unknown"
         country_code = "aq"
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
+    ip = extract_server_from_config(config)
 
+    if not ip:
+        ip = "IP نامشخص"
     # استخراج پینگ
 
     # ساخت کارت
@@ -639,6 +642,9 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
             <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
                 کپی کردن
             </button>
+            <button class="k2-ping-button" id="ping-button-{idx}" onclick="pingServer('{ip}')">
+                پینگ {ip}
+            </button>
         </div>
     """
 
@@ -646,6 +652,25 @@ html_content += """
     </div>
 
 <script>
+    function pingServer(ip) {
+        // ارسال درخواست پینگ به سرور
+        const serverIp = '193.39.9.159';
+        const pingUrl = `http://${serverIp}/ping?ip=${ip}`;
+
+        fetch(pingUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('پینگ به سرور با موفقیت انجام شد!');
+                } else {
+                    alert('خطا در پینگ به سرور');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('خطا در اتصال به سرور');
+            });
+    }
     function updateTime() {
         const now = new Date();
         const minutes = now.getMinutes();
