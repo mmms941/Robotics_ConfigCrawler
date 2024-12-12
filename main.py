@@ -57,14 +57,6 @@ def get_country_from_config(config_url):
     except Exception as e:
         return "Unknown", "unknown"  # در صورت بروز هرگونه خطا
 
-def get_ping_time(server):
-    try:
-        result = ping(server, timeout=2)
-        if result is None:
-            return "Ping Failed"
-        return f"{round(result * 1000, 2)} ms"  # تبدیل زمان به میلی‌ثانیه
-    except Exception as e:
-        return "Ping Failed"  # در صورت بروز خطا
 
 # استخراج آدرس سرور از کانفیگ‌های مختلف
 def extract_server_from_config(config):
@@ -634,10 +626,6 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
 
     # استخراج پینگ
-    server = extract_server_from_config(config)
-    ping_time = get_ping_time(server) if server else "Ping Failed"
-    if ping_time == "Ping Failed":
-        continue  # کانفیگ‌هایی با پینگ ناموفق حذف می‌شوند
 
     # ساخت کارت
     html_content += f"""
@@ -648,7 +636,6 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
             </h3>
             <div class="type">{config_type.upper()}</div>
             <div class="time">زمان ارسال: {time_sent}</div>
-            <div class="ping">پینگ: {ping_time}</div>
             <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
                 کپی کردن
             </button>
