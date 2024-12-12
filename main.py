@@ -642,8 +642,8 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
             <button class="k2-copy-button" id="k2button-{idx}" onclick="copyToClipboard('{config}', {idx})">
                 کپی کردن
             </button>
-            <button class="k2-ping-button" id="ping-button-{idx}" onclick="pingServer('{ip}')">
-                پینگ {ip}
+            <button class="k2-copy-button" id="ping-button-{idx}" onclick="pingServer('{ip}')">
+                پینگ
             </button>
         </div>
     """
