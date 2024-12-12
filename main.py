@@ -626,9 +626,8 @@ for idx, config, config_type, country, country_code, time_sent in processed_conf
     flag_url = f"https://flagcdn.com/w40/{country_code}.png"
     ip = extract_server_from_config(config)
 
-    if not ip or ip == "IP نامشخص":
-        continue  # این کانفیگ را نادیده می‌گیریم و به HTML اضافه نمی‌شود
-    # استخراج پینگ
+    if not ip or ip == "IP نامشخص" or ip.startswith("127."):
+        continue 
 
     # ساخت کارت
     html_content += f"""
