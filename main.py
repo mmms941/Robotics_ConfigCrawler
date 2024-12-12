@@ -652,13 +652,13 @@ html_content += """
     </div>
 
 <script>
-    function pingServer(ip) {
-    // ارسال درخواست پینگ به سرور
-        const serverIp = '193.39.9.159';
-        const pingUrl = `http://${serverIp}:5000/ping?ip=${ip}`;
+function pingServer(ip) {
+    const serverIp = '193.39.9.159';
+    // در صورتی که سایت با HTTPS بارگذاری شود، آدرس API نیز باید با HTTPS باشد.
+    const pingUrl = `https://${serverIp}:5000/ping?ip=${ip}`;  // تغییر HTTP به HTTPS
 
-        fetch(pingUrl)
-            .then(response => response.json())
+    fetch(pingUrl)
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('پینگ به سرور با موفقیت انجام شد! زمان پینگ: ' + data.ping);
