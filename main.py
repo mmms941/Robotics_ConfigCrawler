@@ -655,7 +655,7 @@ html_content += """
 function pingServer(ip) {
     const serverIp = '193.39.9.159';
     // در صورتی که سایت با HTTPS بارگذاری شود، آدرس API نیز باید با HTTPS باشد.
-    const pingUrl = `https://${serverIp}:5000/ping?ip=${ip}`;  // تغییر HTTP به HTTPS
+    const pingUrl = `http://${serverIp}:5000/ping?ip=${ip}`;  // تغییر HTTP به HTTPS
 
     fetch(pingUrl)
         .then(response => response.json())
