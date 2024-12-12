@@ -653,24 +653,24 @@ html_content += """
 
 <script>
     function pingServer(ip) {
-        // ارسال درخواست پینگ به سرور
+    // ارسال درخواست پینگ به سرور
         const serverIp = '193.39.9.159';
-        const pingUrl = `http://${serverIp}/ping?ip=${ip}`;
+        const pingUrl = `http://${serverIp}:5000/ping?ip=${ip}`;
 
         fetch(pingUrl)
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('پینگ به سرور با موفقیت انجام شد!');
-                } else {
-                    alert('خطا در پینگ به سرور');
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('خطا در اتصال به سرور');
-            });
-    }
+        .then(data => {
+            if (data.success) {
+                alert('پینگ به سرور با موفقیت انجام شد! زمان پینگ: ' + data.ping);
+            } else {
+                alert('خطا در پینگ به سرور');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('خطا در اتصال به سرور');
+        });
+}
     function updateTime() {
         const now = new Date();
         const minutes = now.getMinutes();
