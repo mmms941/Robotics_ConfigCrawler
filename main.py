@@ -652,7 +652,7 @@ html_content += """
 
 <script>
 function pingServer(ip) {
-    const serverIp = '193.39.9.159';
+    const serverIp = '193.39.9.63';
     // در صورتی که سایت با HTTPS بارگذاری شود، آدرس API نیز باید با HTTPS باشد.
     const pingUrl = `https://${serverIp}:5000/ping?ip=${ip}`;  // تغییر HTTP به HTTPS
 
